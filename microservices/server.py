@@ -9,6 +9,7 @@ from app.api.extraction import router as extraction_router
 from app.api.chunking import router as chunking_router
 from app.api.embedding import router as embedding_router
 from app.api.reranking import router as reranking_router
+from app.api.generation import router as generation_router
 
 
 app = FastAPI(
@@ -30,6 +31,7 @@ app.include_router(extraction_router)
 app.include_router(chunking_router)
 app.include_router(embedding_router)
 app.include_router(reranking_router)
+app.include_router(generation_router)
 
 @app.get("/")
 async def root():
