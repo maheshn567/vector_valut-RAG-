@@ -1,0 +1,18 @@
+# Python cache
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+
+# Environments
+.env
+.env.*
+venv/
+ENV/
+env/
+microservices/venv/
+microservices/.env
+
+# IDE files
+.vscode/
+.idea/
