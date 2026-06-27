@@ -1,0 +1,50 @@
+from fastapi import APIRouter
+import time
+from app.models.requests import RerankRequest
+from app.providers.rerankers.bge import BGERerankerProvider
+
+router = APIRouter()
+
+# Initialize the provider (model will load lazily on first request)
+bge_reranker = BGERerankerProvider()
+
+@router.post("/rerank")
+async def rerank_chunks(request: RerankRequest):
+    start_time = time.time()
+    
+    try:
+        # Convert Pydantic models to dicts for the provider
+        results_dicts = [result.model_dump() for result in request.results]
+        
+        # Perform the reranking
+        reranked_data = bge_reranker.rerank(
+            query=request.query, 
+            results=results_dicts, 
+            top_k=request.top_k
+        )
+        
+        processing_time_ms = int((time.time() - start_time) * 1000)
+        
+        # Standard Success Response Schema
+        return {
+            "success": True,
+            "data": {
+                "results": reranked_data
+            },
+            "error": None,
+            "metadata": {
+                "processing_time_ms": processing_time_ms
+            }
+        }
+        
+    except Exception as e:
+        # Standard Error Response Schema
+        return {
+            "success": False,
+            "data": None,
+            "error": {
+                "code": "RERANKING_FAILED",
+                "message": str(e)
+            },
+            "metadata": {}
+        }
