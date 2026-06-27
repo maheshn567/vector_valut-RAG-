@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 # EXTRACTION RESPONSE
 class ExtractedPage(BaseModel):
@@ -26,11 +26,19 @@ class ExtractedChunk(BaseModel):
 class ChunkingResponse(BaseModel):
     chunks: List[ExtractedChunk]
 
-#EMBEDDING RESPONSE
-
+# EMBEDDING RESPONSE
 class ChunkEmbedding(BaseModel):
     chunk_id: str
     vector: List[float]
 
 class EmbeddingResponse(BaseModel):
     embeddings: List[ChunkEmbedding]
+
+# RERANK RESPONSE
+class RerankedResult(BaseModel):
+    chunk_id: str
+    text: str
+    score: float
+
+class RerankingResponse(BaseModel):
+    results: List[RerankedResult]
