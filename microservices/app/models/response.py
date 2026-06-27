@@ -42,3 +42,16 @@ class RerankedResult(BaseModel):
 
 class RerankingResponse(BaseModel):
     results: List[RerankedResult]
+
+# LLM GENERATION RESPONSE
+class Citation(BaseModel):
+    chunk_id: str
+
+class TokenUsage(BaseModel):
+    prompt_tokens: int
+    completion_tokens: int
+
+class GenerateResponse(BaseModel):
+    answer: str
+    citations: List[Citation]
+    usage: TokenUsage

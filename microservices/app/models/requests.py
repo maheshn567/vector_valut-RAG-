@@ -38,3 +38,11 @@ class RerankRequest(BaseModel):
     query: str
     results: List[RetrievedResult]
     top_k: int = 5
+
+# LLM SERVICES
+# The incoming request schema for /generate
+class GenerateRequest(BaseModel):
+    query: str
+    context: List[RetrievedResult]
+    system_prompt: str
+    provider: str = "openai"
