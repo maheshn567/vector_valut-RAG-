@@ -1,12 +1,12 @@
 from fastapi import APIRouter
 import time
 from app.models.requests import RerankRequest
-from app.providers.rerankers.bge import BGERerankerProvider
+from app.providers.rerankers.voyage import VoyageRerankerProvider
 
 router = APIRouter()
 
-# Initialize the provider (model will load lazily on first request)
-bge_reranker = BGERerankerProvider()
+# Initialize the provider (client loads lazily on first request)
+voyage_reranker = VoyageRerankerProvider()
 
 @router.post("/rerank")
 async def rerank_chunks(request: RerankRequest):
@@ -17,7 +17,7 @@ async def rerank_chunks(request: RerankRequest):
         results_dicts = [result.model_dump() for result in request.results]
         
         # Perform the reranking
-        reranked_data = bge_reranker.rerank(
+        reranked_data = voyage_reranker.rerank(
             query=request.query, 
             results=results_dicts, 
             top_k=request.top_k
