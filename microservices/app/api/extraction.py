@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Request, UploadFile
+from fastapi import APIRouter, HTTPException, Request, UploadFile,Depends
 from typing import Optional, List
 from app.models.requests import ExtractionRequest
 from app.models.response import ExtractionResponse, ExtractedPage
@@ -8,11 +8,12 @@ import pptx
 from bs4 import BeautifulSoup
 import requests
 import json
+from app.utility.security import validate_api_key
 
 router = APIRouter()
 
 @router.post("/extract")
-async def extract_content(request: Request):
+async def extract_content(request: Request,api_key: str = Depends(validate_api_key)):
     content_type = request.headers.get("content-type", "")
     
     file_bytes = None

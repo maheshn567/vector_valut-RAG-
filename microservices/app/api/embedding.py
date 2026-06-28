@@ -1,8 +1,9 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,Depends
 import time
 from app.providers.embeddings.voyage import VoyageEmbeddingProvider
 from app.models.requests import EmbedRequest
 from app.models.response import ChunkEmbedding
+from app.utility.security import validate_api_key
 
 router = APIRouter()
 
@@ -10,7 +11,7 @@ router = APIRouter()
 voyage_provider = VoyageEmbeddingProvider()
 
 @router.post("/embed")
-async def generate_embeddings(request: EmbedRequest):
+async def generate_embeddings(request: EmbedRequest,api_key: str = Depends(validate_api_key)):
     start_time = time.time()
     
     try:

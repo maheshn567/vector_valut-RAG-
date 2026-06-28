@@ -1,7 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,Depends
 import time
 from app.models.requests import GenerateRequest
 from app.providers.llm.openai_provider import OpenAILLMProvider
+from app.utility.security import validate_api_key
 
 router = APIRouter()
 
@@ -9,7 +10,7 @@ router = APIRouter()
 openai_llm = OpenAILLMProvider()
 
 @router.post("/generate")
-async def generate_answer(request: GenerateRequest):
+async def generate_answer(request: GenerateRequest,api_key: str = Depends(validate_api_key)):
     start_time = time.time()
     
     try:

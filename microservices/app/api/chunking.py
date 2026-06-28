@@ -1,9 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,Depends
 from app.models.response import ExtractionResponse
 from app.models.requests import ChunkingRequest
 from typing import List
 import uuid
 import time
+from app.utility.security import validate_api_key
 
 router = APIRouter()
 
@@ -36,7 +37,7 @@ def generate_fixed_chunks(text: str, page_number: int, chunk_size: int, chunk_ov
     return chunks
 
 @router.post("/chunk")
-async def chunk_document(request: ChunkingRequest):
+async def chunk_document(request: ChunkingRequest, api_key: str = Depends(validate_api_key)):
     start_time = time.time()
     all_chunks = []
     

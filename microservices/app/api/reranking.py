@@ -1,7 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,Depends
 import time
 from app.models.requests import RerankRequest
 from app.providers.rerankers.voyage import VoyageRerankerProvider
+from app.utility.security import validate_api_key
 
 router = APIRouter()
 
@@ -9,7 +10,7 @@ router = APIRouter()
 voyage_reranker = VoyageRerankerProvider()
 
 @router.post("/rerank")
-async def rerank_chunks(request: RerankRequest):
+async def rerank_chunks(request: RerankRequest,api_key: str = Depends(validate_api_key)):
     start_time = time.time()
     
     try:
