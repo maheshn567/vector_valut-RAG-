@@ -6,7 +6,7 @@ from .base import EmbeddingProvider # Import the interface
 class VoyageEmbeddingProvider(EmbeddingProvider):
     def __init__(self):
         self.client = None
-        self.model = "voyage-code-2" 
+        self.model = "voyage-3" 
 
     def _get_client(self) -> voyageai.Client:
         if self.client is None:
