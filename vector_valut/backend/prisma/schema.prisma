@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Tenant {
+  id             Int        @id @default(autoincrement())
+  tenantId       String     @unique @map("tenant_id") @db.Uuid
+  orgName        String     @map("org_name")
+  s3BucketName   String     @map("s3_bucket_name")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+  apps           App[]
+  groups         Group[]
+  documents      Document[]
+  // chunks         Chunk[]
+
+  @@map("tenants")
+}
+
+model App {
+  id             Int      @id @default(autoincrement())
+  appId          String   @unique @map("app_id") @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  tenant         Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  appName        String   @map("app_name")
+  appDescription String   @map("app_description")
+  appType        String   @map("app_type")
+  isActive       Boolean  @default(true) @map("is_active")
+  apiKey         String   @map("api_key")
+  appDbConfig    Json?    @map("app_db_config")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  groups         Group[]
+
+  @@map("apps")
+}
+
+model Group {
+  id               Int        @id @default(autoincrement())
+  groupId          String     @unique @map("group_id") @db.Uuid
+  appId            String     @map("app_id") @db.Uuid
+  app              App        @relation(fields: [appId], references: [appId], onDelete: Cascade)
+  tenantId         String     @map("tenant_id") @db.Uuid
+  tenant           Tenant     @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  groupName        String     @map("group_name")
+  groupDescription String     @map("group_description")
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @updatedAt @map("updated_at")
+  documents        Document[]
+  // chunks           Chunk[]
+
+  @@map("groups")
+}
+
+model Document {
+  id        Int      @id @default(autoincrement())
+  docId     String   @unique @map("doc_id") @db.Uuid
+  groupId   String   @map("group_id") @db.Uuid
+  group     Group    @relation(fields: [groupId], references: [groupId], onDelete: Cascade)
+  tenantId  String   @map("tenant_id") @db.Uuid
+  tenant    Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  docName   String   @map("doc_name")
+  docPath   String   @map("doc_path")
+  docType   String   @map("doc_type")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  // chunks    Chunk[]
+
+  @@map("documents")
+}
+
+// model Chunk {
+//   id        Int      @id @default(autoincrement())
+//   chunkId   String   @unique @map("chunk_id") @db.Uuid
+//   docId     String   @map("doc_id") @db.Uuid
+//   document  Document @relation(fields: [docId], references: [docId], onDelete: Cascade)
+//   groupId   String   @map("group_id") @db.Uuid
+//   group     Group    @relation(fields: [groupId], references: [groupId], onDelete: Cascade)
+//   tenantId  String   @map("tenant_id") @db.Uuid
+//   tenant    Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+//   text      String   @db.Text
+//   // Stores pgvector's 1024-dimensional vectors. Supported via Prisma raw SQL queries.
+//   vector    Unsupported("vector(1024)")?
+//   metadata  Json     @map("metadata")
+//   createdAt DateTime @default(now()) @map("created_at")
+//   updatedAt DateTime @updatedAt @map("updated_at")
+
+//   @@map("chunks")
+// }
