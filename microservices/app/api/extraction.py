@@ -8,6 +8,7 @@ import pptx
 from bs4 import BeautifulSoup
 import requests
 import json
+import trafilatura
 from app.utility.security import validate_api_key
 
 router = APIRouter()
@@ -21,6 +22,7 @@ async def extract_content(request: Request,api_key: str = Depends(validate_api_k
     file_content_type = None
     url = None
     text = None
+    webpage_title = None
     
     if "multipart/form-data" in content_type:
         form = await request.form()
@@ -111,16 +113,30 @@ async def extract_content(request: Request,api_key: str = Depends(validate_api_k
         doc_name = url
         doc_type = "html"
         try:
-            headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-            resp = requests.get(url, headers=headers, timeout=10)
-            resp.raise_for_status()
-            soup = BeautifulSoup(resp.text, "html.parser")
-            # Remove scripts and styles
-            for script in soup(["script", "style"]):
-                script.decompose()
-            text_content = soup.get_text(separator="\n")
-            cleaned_lines = [line.strip() for line in text_content.splitlines() if line.strip()]
-            text_content = "\n".join(cleaned_lines)
+            # 1. Fetch webpage raw HTML using trafilatura
+            downloaded = trafilatura.fetch_url(url)
+            if downloaded is None:
+                # Fallback download using requests if trafilatura fails to fetch
+                headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+                resp = requests.get(url, headers=headers, timeout=10)
+                resp.raise_for_status()
+                downloaded = resp.text
+                
+            # 2. Extract clean content and metadata
+            extracted = trafilatura.bare_extraction(downloaded)
+            if extracted is None or not extracted.get("text"):
+                # Fallback to BeautifulSoup if trafilatura extraction fails
+                soup = BeautifulSoup(downloaded, "html.parser")
+                for script in soup(["script", "style"]):
+                    script.decompose()
+                text_content = soup.get_text(separator="\n")
+                cleaned_lines = [line.strip() for line in text_content.splitlines() if line.strip()]
+                text_content = "\n".join(cleaned_lines)
+                webpage_title = doc_name.split("/")[-1] if "/" in doc_name else doc_name
+            else:
+                text_content = extracted["text"]
+                webpage_title = extracted.get("title") or (doc_name.split("/")[-1] if "/" in doc_name else doc_name)
+
             pages.append(ExtractedPage(page_number=1, text=text_content))
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Failed to fetch or parse URL: {str(e)}")
@@ -147,7 +163,7 @@ async def extract_content(request: Request,api_key: str = Depends(validate_api_k
         pages=pages,
         metadata={
             "page_count": len(pages),
-            "title": doc_name.split("/")[-1] if "/" in doc_name else doc_name
+            "title": webpage_title if url else (doc_name.split("/")[-1] if "/" in doc_name else doc_name)
         }
     )
     
