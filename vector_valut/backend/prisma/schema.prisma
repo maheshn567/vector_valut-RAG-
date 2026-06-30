@@ -10,41 +10,46 @@ datasource db {
 }
 
 model Tenant {
-  id             Int        @id @default(autoincrement())
-  tenantId       String     @unique @map("tenant_id") @db.Uuid
-  orgName        String     @map("org_name")
-  s3BucketName   String     @map("s3_bucket_name")
-  createdAt      DateTime   @default(now()) @map("created_at")
-  updatedAt      DateTime   @updatedAt @map("updated_at")
-  apps           App[]
-  groups         Group[]
-  documents      Document[]
-  // chunks         Chunk[]
+  id            Int            @id @default(autoincrement())
+  tenantId      String         @unique @default(dbgenerated("gen_random_uuid()")) @map("tenant_id") @db.Uuid
+  name          String
+  email         String         @unique
+  password      String
+  orgName       String         @map("org_name")
+  s3BucketName  String         @map("s3_bucket_name")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  apps          App[]
+  groups        Group[]
+  documents     Document[]
+  chunks        Chunk[]
+  conversations Conversation[]
 
   @@map("tenants")
 }
 
 model App {
-  id             Int      @id @default(autoincrement())
-  appId          String   @unique @map("app_id") @db.Uuid
-  tenantId       String   @map("tenant_id") @db.Uuid
-  tenant         Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
-  appName        String   @map("app_name")
-  appDescription String   @map("app_description")
-  appType        String   @map("app_type")
-  isActive       Boolean  @default(true) @map("is_active")
-  apiKey         String   @map("api_key")
-  appDbConfig    Json?    @map("app_db_config")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id             Int            @id @default(autoincrement())
+  appId          String         @unique @default(dbgenerated("gen_random_uuid()")) @map("app_id") @db.Uuid
+  tenantId       String         @map("tenant_id") @db.Uuid
+  tenant         Tenant         @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  appName        String         @map("app_name")
+  appDescription String         @map("app_description")
+  appType        String         @map("app_type")
+  isActive       Boolean        @default(true) @map("is_active")
+  apiKey         String         @map("api_key")
+  appDbConfig    Json?          @map("app_db_config")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
   groups         Group[]
+  conversations  Conversation[]
 
   @@map("apps")
 }
 
 model Group {
   id               Int        @id @default(autoincrement())
-  groupId          String     @unique @map("group_id") @db.Uuid
+  groupId          String     @unique @default(dbgenerated("gen_random_uuid()")) @map("group_id") @db.Uuid
   appId            String     @map("app_id") @db.Uuid
   app              App        @relation(fields: [appId], references: [appId], onDelete: Cascade)
   tenantId         String     @map("tenant_id") @db.Uuid
@@ -54,14 +59,14 @@ model Group {
   createdAt        DateTime   @default(now()) @map("created_at")
   updatedAt        DateTime   @updatedAt @map("updated_at")
   documents        Document[]
-  // chunks           Chunk[]
+  chunks           Chunk[]
 
   @@map("groups")
 }
 
 model Document {
   id        Int      @id @default(autoincrement())
-  docId     String   @unique @map("doc_id") @db.Uuid
+  docId     String   @unique @default(dbgenerated("gen_random_uuid()")) @map("doc_id") @db.Uuid
   groupId   String   @map("group_id") @db.Uuid
   group     Group    @relation(fields: [groupId], references: [groupId], onDelete: Cascade)
   tenantId  String   @map("tenant_id") @db.Uuid
@@ -71,26 +76,44 @@ model Document {
   docType   String   @map("doc_type")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-  // chunks    Chunk[]
+  chunks    Chunk[]
 
   @@map("documents")
 }
 
-// model Chunk {
-//   id        Int      @id @default(autoincrement())
-//   chunkId   String   @unique @map("chunk_id") @db.Uuid
-//   docId     String   @map("doc_id") @db.Uuid
-//   document  Document @relation(fields: [docId], references: [docId], onDelete: Cascade)
-//   groupId   String   @map("group_id") @db.Uuid
-//   group     Group    @relation(fields: [groupId], references: [groupId], onDelete: Cascade)
-//   tenantId  String   @map("tenant_id") @db.Uuid
-//   tenant    Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
-//   text      String   @db.Text
-//   // Stores pgvector's 1024-dimensional vectors. Supported via Prisma raw SQL queries.
-//   vector    Unsupported("vector(1024)")?
-//   metadata  Json     @map("metadata")
-//   createdAt DateTime @default(now()) @map("created_at")
-//   updatedAt DateTime @updatedAt @map("updated_at")
+model Chunk {
+  id        Int                          @id @default(autoincrement())
+  chunkId   String                       @unique @default(dbgenerated("gen_random_uuid()")) @map("chunk_id") @db.Uuid
+  docId     String                       @map("doc_id") @db.Uuid
+  document  Document                     @relation(fields: [docId], references: [docId], onDelete: Cascade)
+  groupId   String                       @map("group_id") @db.Uuid
+  group     Group                        @relation(fields: [groupId], references: [groupId], onDelete: Cascade)
+  tenantId  String                       @map("tenant_id") @db.Uuid
+  tenant    Tenant                       @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  text      String                       @db.Text
+  // Stores pgvector's 1024-dimensional vectors. Supported via Prisma raw SQL queries.
+  vector    Unsupported("vector(1024)")?
+  metadata  Json                         @map("metadata")
+  createdAt DateTime                     @default(now()) @map("created_at")
+  updatedAt DateTime                     @updatedAt @map("updated_at")
 
-//   @@map("chunks")
-// }
+  @@map("chunks")
+}
+
+//CONVERSATION
+
+model Conversation {
+  id             Int      @id @default(autoincrement())
+  conversationId String   @unique @default(dbgenerated("gen_random_uuid()")) @map("conversation_id") @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  tenant         Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  appId          String   @map("app_id") @db.Uuid
+  app            App      @relation(fields: [appId], references: [appId], onDelete: Cascade)
+  userId         String   @map("user_id") @db.Uuid
+  messages       Json     @default("[]")
+  metadata       Json
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("conversations")
+}

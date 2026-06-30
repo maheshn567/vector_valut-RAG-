@@ -123,7 +123,7 @@ async def extract_content(request: Request,api_key: str = Depends(validate_api_k
                 downloaded = resp.text
                 
             # 2. Extract clean content and metadata
-            extracted = trafilatura.bare_extraction(downloaded)
+            extracted = trafilatura.bare_extraction(downloaded, as_dict=True)
             if extracted is None or not extracted.get("text"):
                 # Fallback to BeautifulSoup if trafilatura extraction fails
                 soup = BeautifulSoup(downloaded, "html.parser")

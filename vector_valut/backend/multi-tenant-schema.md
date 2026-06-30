@@ -62,3 +62,34 @@ Stores the text segments extracted from documents and their corresponding vector
 * `metadata` (json) - Stores page number, offsets, token count
 * `created_at` (timestamp)
 * `updated_at` (timestamp)
+
+You should use the X-API-Key (verifyApiKey middleware) authentication for programmatic and integration-facing features. These are routes called by external client websites, backend scripts, or chatbots rather than dashboard users.
+
+Here is the exact breakdown of which features and routes should use X-API-Key authentication:
+
+1. RAG Query & Vector Search
+Feature: Querying the knowledge base (retrieving relevant context chunks and generating LLM answers).
+Routes: e.g., POST /api/v1/query or POST /api/v1/search
+Why: When a tenant embeds a search widget or chatbot on their website, the widget will include their specific App's X-API-Key. The middleware validates the key, extracts the appId and tenantId, and queries only the chunks belonging to that specific app.
+2. Document Upload & Text Ingestion
+Feature: Uploading documents, chunking text, generating embeddings, and storing them in the database.
+Routes: e.g., POST /api/v1/documents/upload or POST /api/v1/chunks/ingest
+Why: Automated ingestion pipelines, crawler bots, or sync scripts running on a tenant's server need a long-lived API key to upload new content into a specific document corpus (Group).
+3. Client App Configuration
+Feature: Fetching settings, chatbot custom themes, greeting messages, or prompts.
+Routes: e.g., GET /api/v1/app/client-config
+Why: The widget on the frontend needs to load the metadata stored in appDbConfig (like layout theme, chatbot name) without a user logging in. It uses the App's public X-API-Key to fetch only its configuration.
+Comparison of Route Protection in Your Code
+To make it clear, here is how you would organize your route files:
+
+1. Under app.route.js and tenant.route.js (Protected by verifyJWT):
+Used by the dashboard UI when a tenant admin logs in:
+
+POST /api/v1/tenant/create-app (Create app)
+GET /api/v1/app/tenant-apps (List apps)
+PATCH /api/v1/app/update-app/:id (Change app configuration)
+2. Under document.route.js and query.route.js (Protected by verifyApiKey):
+Used by external applications or code integrations:
+
+POST /api/v1/document/upload (Upload file to corpus)
+POST /api/v1/query/ask (Perform semantic search & LLM generation)
