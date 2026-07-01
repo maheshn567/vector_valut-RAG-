@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vector Vault | Production-Grade AI Infrastructure</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Hanken+Grotesk:wght@700;800&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#233143",
+                        "on-primary": "#2f295e",
+                        "on-background": "#d5e4fa",
+                        "surface-variant": "#283647",
+                        "primary-fixed-dim": "#c6bfff",
+                        "secondary": "#c6bfff",
+                        "surface-container-lowest": "#010f1f",
+                        "on-primary-fixed": "#191248",
+                        "on-tertiary-fixed-variant": "#005140",
+                        "surface": "#051424",
+                        "on-error": "#690005",
+                        "tertiary-fixed-dim": "#4bddb7",
+                        "secondary-fixed-dim": "#c6bfff",
+                        "surface-container-low": "#0e1c2d",
+                        "primary": "#e4deff",
+                        "background": "#051424",
+                        "error": "#ffb4ab",
+                        "surface-container-high": "#1d2b3c",
+                        "primary-container": "#c6bfff",
+                        "secondary-container": "#4029ba",
+                        "inverse-primary": "#5d5890",
+                        "surface-bright": "#2c3a4c",
+                        "surface-tint": "#c6bfff",
+                        "on-secondary-container": "#b4abff",
+                        "tertiary-container": "#4bddb7",
+                        "surface-container-highest": "#283647",
+                        "inverse-surface": "#d5e4fa",
+                        "on-tertiary-fixed": "#002018",
+                        "on-secondary-fixed-variant": "#4029ba",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-container": "#514b83",
+                        "on-surface": "#d5e4fa",
+                        "surface-container": "#122031",
+                        "tertiary": "#6dfad2",
+                        "primary-fixed": "#e4dfff",
+                        "on-tertiary-container": "#005e4a",
+                        "on-surface-variant": "#c9c5d0",
+                        "outline-variant": "#47464f",
+                        "on-primary-fixed-variant": "#454077",
+                        "tertiary-fixed": "#6dfad2",
+                        "on-secondary": "#2900a0",
+                        "on-tertiary": "#00382b",
+                        "outline": "#928f9a",
+                        "on-secondary-fixed": "#160066",
+                        "secondary-fixed": "#e4dfff",
+                        "surface-dim": "#051424",
+                        "error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-desktop": "40px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "container-max": "1280px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "code-block": ["JetBrains Mono"],
+                        "label-md": ["JetBrains Mono"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "display-lg-mobile": ["Hanken Grotesk"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "code-block": ["14px", {"lineHeight": "1.7", "fontWeight": "400"}],
+                        "label-md": ["13px", {"lineHeight": "1.4", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                        "display-lg-mobile": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            color: #d5e4fa;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+        
+        .grid-texture {
+            background-size: 24px 24px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        }
+
+        .glow-orb {
+            filter: blur(80px);
+            opacity: 0.15;
+            position: absolute;
+            z-index: 0;
+            border-radius: 9999px;
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1) translate(0, 0); opacity: 0.15; }
+            50% { transform: scale(1.2) translate(10px, -20px); opacity: 0.25; }
+        }
+
+        .fade-up {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .glass-panel {
+            background: rgba(25, 33, 49, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #e4deff 0%, #6dfad2 50%, #ffb77d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hover-lift {
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            border-color: rgba(228, 222, 255, 0.2);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.9); }
+        }
+    </style>
+</head>
+<body class="font-body-lg">
+<!-- Section 1: TopNavBar -->
+<nav class="fixed top-0 w-full h-[64px] bg-surface/70 backdrop-blur-xl border-b border-white/5 z-50 transition-all duration-300">
+<div class="flex justify-between items-center px-margin-desktop max-w-container-max mx-auto w-full h-full">
+<div class="flex items-center gap-8">
+<span class="text-headline-md font-headline-md text-on-surface tracking-tight">Vector Vault</span>
+<div class="hidden md:flex gap-6 items-center">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-lg text-body-lg" href="#">Features</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-lg text-body-lg" href="#">Pipeline</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-lg text-body-lg" href="#">Pricing</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-lg text-body-lg" href="#">Docs</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity">shield</button>
+<button class="hidden sm:block text-on-surface-variant hover:text-primary transition-colors font-body-lg text-body-lg">Sign in</button>
+<button class="bg-primary text-on-primary px-5 py-2 rounded-lg font-bold hover:opacity-90 transition-opacity text-body-sm">Get started free</button>
+</div>
+</div>
+</nav>
+<!-- Section 2: Hero -->
+<section class="relative min-h-screen flex flex-col items-center justify-center pt-32 pb-20 overflow-hidden">
+<div class="absolute inset-0 grid-texture z-0 pointer-events-none"></div>
+<!-- Animated Glow Orbs -->
+<div class="glow-orb w-[400px] h-[400px] bg-[#6C5CE7] top-1/4 -left-20"></div>
+<div class="glow-orb w-[350px] h-[350px] bg-[#4BDDB7] bottom-1/4 -right-10" style="animation-delay: 2s;"></div>
+<div class="glow-orb w-[300px] h-[300px] bg-[#FFB77D] top-1/3 left-1/2 -translate-x-1/2" style="animation-delay: 4s;"></div>
+<div class="relative z-10 max-w-container-max mx-auto px-margin-desktop text-center">
+<div class="fade-up inline-flex items-center gap-2 bg-surface-container-high/50 border border-white/10 px-4 py-1.5 rounded-full mb-8">
+<span class="status-dot bg-tertiary"></span>
+<span class="text-label-md font-label-md text-tertiary uppercase tracking-widest">System Operational</span>
+</div>
+<h1 class="fade-up font-display-lg text-display-lg-mobile md:text-display-lg max-w-4xl mx-auto mb-6">
+                Build <span class="gradient-text">production-grade RAG apps</span> in minutes.
+            </h1>
+<p class="fade-up text-on-surface-variant text-body-lg max-w-2xl mx-auto mb-10">
+                Vector Vault provides the reliable infrastructure needed to turn unstructured data into actionable knowledge with low-latency retrieval and precise context injection.
+            </p>
+<div class="fade-up flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
+<button class="w-full sm:w-auto bg-[#4029ba] text-white px-8 py-4 rounded-xl font-bold text-body-lg hover:shadow-[0_0_20px_rgba(64,41,186,0.4)] transition-all">
+                    Start building free
+                </button>
+<button class="w-full sm:w-auto border border-white/10 hover:bg-white/5 text-on-surface px-8 py-4 rounded-xl font-bold text-body-lg transition-all">
+                    See how it works
+                </button>
+</div>
+<!-- Hero App Preview -->
+<div class="fade-up glass-panel rounded-2xl p-2 max-w-5xl mx-auto shadow-2xl relative overflow-hidden group">
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden border border-white/5">
+<div class="bg-surface-container-high/50 h-10 flex items-center px-4 border-b border-white/5">
+<div class="flex gap-1.5">
+<div class="w-3 h-3 rounded-full bg-red-500/30"></div>
+<div class="w-3 h-3 rounded-full bg-amber-500/30"></div>
+<div class="w-3 h-3 rounded-full bg-emerald-500/30"></div>
+</div>
+<div class="ml-4 bg-surface-container-low px-4 py-0.5 rounded text-[10px] text-on-surface-variant font-code-block w-64 text-left">https://vault.ai/chat/project-alpha</div>
+</div>
+<div class="p-6 md:p-8 flex flex-col gap-6 text-left">
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary text-sm">smart_toy</span>
+</div>
+<div class="flex-1 space-y-3">
+<p class="text-on-surface text-body-lg">Based on your documentation, the multi-tenant isolation logic is handled at the namespace level within the vector database, ensuring that tenant 04X-91 cannot access neighbor data segments.</p>
+<div class="flex flex-wrap gap-3 mt-4">
+<div class="glass-panel px-3 py-2 rounded-lg flex items-center gap-2 text-xs border-primary/20">
+<span class="material-symbols-outlined text-[14px] text-tertiary">description</span>
+<span>tenant_policy.pdf</span>
+</div>
+<div class="glass-panel px-3 py-2 rounded-lg flex items-center gap-2 text-xs border-primary/20">
+<span class="material-symbols-outlined text-[14px] text-tertiary">description</span>
+<span>auth_schema.json</span>
+</div>
+</div>
+</div>
+</div>
+<div class="border-t border-white/5 pt-6">
+<div class="bg-surface-container-high px-4 py-3 rounded-xl flex justify-between items-center">
+<span class="text-on-surface-variant text-body-sm">Ask about your data...</span>
+<span class="material-symbols-outlined text-primary">send</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Decorative element -->
+<div class="absolute -right-20 -bottom-20 w-64 h-64 bg-primary blur-3xl opacity-10 group-hover:opacity-20 transition-opacity"></div>
+</div>
+</div>
+</section>
+<!-- Section 3: Stats Bar -->
+<section class="border-y border-white/5 bg-surface-container-low/30 py-12 relative z-10">
+<div class="max-w-container-max mx-auto px-margin-desktop">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-gutter">
+<div class="text-center md:border-r border-white/10 last:border-0">
+<div class="font-headline-md text-display-lg-mobile text-primary mb-1">428k</div>
+<div class="text-label-md text-on-surface-variant uppercase tracking-widest">Chunks Processed</div>
+</div>
+<div class="text-center md:border-r border-white/10 last:border-0">
+<div class="font-headline-md text-display-lg-mobile text-tertiary mb-1">99.9%</div>
+<div class="text-label-md text-on-surface-variant uppercase tracking-widest">Uptime SLA</div>
+</div>
+<div class="text-center md:border-r border-white/10 last:border-0">
+<div class="font-headline-md text-display-lg-mobile text-primary-fixed-dim mb-1">184ms</div>
+<div class="text-label-md text-on-surface-variant uppercase tracking-widest">Avg. Latency</div>
+</div>
+<div class="text-center md:border-r border-white/10 last:border-0">
+<div class="font-headline-md text-display-lg-mobile text-on-surface mb-1">12+</div>
+<div class="text-label-md text-on-surface-variant uppercase tracking-widest">Model Providers</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 4: Features Bento Grid -->
+<section class="py-24 relative z-10">
+<div class="max-w-container-max mx-auto px-margin-desktop">
+<div class="mb-16">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-4">Engineered for Reliability</h2>
+<p class="text-on-surface-variant max-w-xl">Every component of the Vault is designed to provide the security and speed your production environment demands.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Large Card -->
+<div class="md:col-span-2 glass-panel p-8 rounded-2xl hover-lift flex flex-col justify-between">
+<div>
+<div class="w-12 h-12 rounded-xl bg-primary-container/20 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary text-3xl">security</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-4">Multi-tenant isolation</h3>
+<p class="text-on-surface-variant mb-8 max-w-md">Hardened data boundaries at the infrastructure level. Each tenant resides in a cryptographically isolated vector namespace.</p>
+</div>
+<div class="flex items-center gap-2 font-code-block text-xs bg-surface-container-high/50 p-4 rounded-lg self-start">
+<span class="bg-primary/20 text-primary px-2 py-1 rounded">App-Root</span>
+<span class="text-on-surface-variant">→</span>
+<span class="bg-tertiary/20 text-tertiary px-2 py-1 rounded">Project-A</span>
+<span class="text-on-surface-variant">→</span>
+<span class="bg-secondary/20 text-secondary px-2 py-1 rounded">User-049</span>
+</div>
+</div>
+<!-- Small Card 1 -->
+<div class="glass-panel p-8 rounded-2xl hover-lift">
+<div class="w-12 h-12 rounded-xl bg-tertiary-container/20 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-tertiary text-3xl">hub</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-4">Two-stage retrieval</h3>
+<p class="text-on-surface-variant">Hybrid keyword + semantic search with an automated re-ranker stage for maximum accuracy.</p>
+</div>
+<!-- Small Card 2 -->
+<div class="glass-panel p-8 rounded-2xl hover-lift">
+<div class="w-12 h-12 rounded-xl bg-secondary-container/20 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-secondary text-3xl">extension</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-4">Pluggable providers</h3>
+<p class="text-on-surface-variant">Switch between OpenAI, Anthropic, or local Llama instances with a single config line.</p>
+</div>
+<!-- Small Card 3 -->
+<div class="glass-panel p-8 rounded-2xl hover-lift">
+<div class="w-12 h-12 rounded-xl bg-primary-container/20 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary text-3xl">verified</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-4">Citation-aware answers</h3>
+<p class="text-on-surface-variant">Automated mapping of every generated claim back to the original source chunk.</p>
+</div>
+<!-- Small Card 4 -->
+<div class="glass-panel p-8 rounded-2xl hover-lift">
+<div class="w-12 h-12 rounded-xl bg-tertiary-container/20 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-tertiary text-3xl">upload_file</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-4">Any document, handled</h3>
+<div class="mt-6 w-full rounded-xl overflow-hidden bg-surface-container-high/20 border border-white/5 flex items-center justify-center p-2">
+<img alt="Supported File Types" class="w-full h-auto object-cover max-h-32 object-center rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaZOaXei1NHram3iJxWfRxePxB6VJWBrFr7dA1Uia1BiWw-TlhHE1tPKJntpwWYu_yklyx483RGdo2cS0sPpRphefsTpBJifH1XAjeWLbH4hRSE2p39rPZpuOCEQp92EESB9bQmI7Bb2i0-BI6pocvPzT1CyHBYJmoS4bVtcwPti7KTsB-ZHZsUg8i7BFvZ7XCA578EZtNTBnpacKCg8U4ySAyvysedL8us0cAQMHK4Y8HoRtORukwM5WTSWv4xVO6vOg80e9R5dQ"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 5: Pipeline Visualization -->
+<section class="py-24 bg-surface-container-lowest/50 relative z-10 overflow-hidden">
+<div class="max-w-container-max mx-auto px-margin-desktop">
+<div class="text-center mb-20">
+<h2 class="font-headline-md text-display-lg-mobile md:text-headline-md text-on-surface mb-4">The Intelligent Core</h2>
+<p class="text-on-surface-variant max-w-xl mx-auto">From raw document to queryable vector in milliseconds.</p>
+</div>
+<div class="relative flex flex-col md:flex-row justify-between items-center gap-12 max-w-4xl mx-auto">
+<!-- Connection Line -->
+<div class="hidden md:block absolute top-1/2 left-0 w-full h-5 -translate-y-1/2 z-0 overflow-hidden [&amp;&gt;svg]:w-full [&amp;&gt;svg]:h-full [&amp;&gt;svg]:object-fill">
+<!-- STITCH_SVG_START:ANIMATION_13 class="" --><div id="animated-svg-ANIMATION_13" class="" style="display:block;width:100%;height:100%;min-height:200px;"><svg width="200" height="20" viewBox="0 0 200 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M0 10C50 10 50 2 100 2C150 2 150 18 200 18" stroke="url(#paint0_linear)" stroke-width="2" stroke-linecap="round">
+    <animate attributeName="stroke-dasharray" from="0,1000" to="1000,0" dur="3s" repeatCount="infinite" />
+  </path>
+  <defs>
+    <linearGradient id="paint0_linear" x1="0" y1="10" x2="200" y2="10" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6C5CE7" />
+      <stop offset="1" stop-color="#4BDDB7" />
+    </linearGradient>
+  </defs>
+</svg></div><!-- STITCH_SVG_END:ANIMATION_13 -->
+</div>
+<div class="relative z-10 flex flex-col items-center gap-4 group">
+<div class="w-20 h-20 rounded-full glass-panel flex items-center justify-center border-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-primary text-3xl">track_changes</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface uppercase">Extract</span>
+</div>
+<div class="relative z-10 flex flex-col items-center gap-4 group">
+<div class="w-20 h-20 rounded-full glass-panel flex items-center justify-center border-tertiary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-tertiary text-3xl">splitscreen</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface uppercase">Chunk</span>
+</div>
+<div class="relative z-10 flex flex-col items-center gap-4 group">
+<div class="w-20 h-20 rounded-full glass-panel flex items-center justify-center border-primary-fixed-dim group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-primary-fixed-dim text-3xl">view_in_ar</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface uppercase">Embed</span>
+</div>
+<div class="relative z-10 flex flex-col items-center gap-4 group">
+<div class="w-20 h-20 rounded-full glass-panel flex items-center justify-center border-secondary group-hover:scale-110 transition-transform bg-secondary/5">
+<span class="material-symbols-outlined text-secondary text-3xl">database</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface uppercase">Indexed</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 6: Developer Code Block -->
+<section class="py-24 relative z-10">
+<div class="max-w-container-max mx-auto px-margin-desktop">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-6">Designed for Developers</h2>
+<p class="text-on-surface-variant text-body-lg mb-8">Stop worrying about chunking strategies and embedding models. Our API handles the complexity so you can focus on the user experience.</p>
+<div class="space-y-4">
+<div class="flex items-center gap-4 p-4 rounded-xl border border-white/5 hover:bg-white/5 transition-colors cursor-pointer group">
+<span class="font-code-block text-xs font-bold text-tertiary bg-tertiary/10 px-2 py-1 rounded">POST</span>
+<span class="font-code-block text-on-surface">/v1/vault/ingest</span>
+<span class="material-symbols-outlined ml-auto text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward</span>
+</div>
+<div class="flex items-center gap-4 p-4 rounded-xl border border-white/5 hover:bg-white/5 transition-colors cursor-pointer group">
+<span class="font-code-block text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded">POST</span>
+<span class="font-code-block text-on-surface">/v1/vault/query</span>
+<span class="material-symbols-outlined ml-auto text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward</span>
+</div>
+<div class="flex items-center gap-4 p-4 rounded-xl border border-white/5 hover:bg-white/5 transition-colors cursor-pointer group">
+<span class="font-code-block text-xs font-bold text-on-secondary-container bg-secondary/10 px-2 py-1 rounded">GET</span>
+<span class="font-code-block text-on-surface">/v1/vault/status</span>
+<span class="material-symbols-outlined ml-auto text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-2xl border border-white/5 overflow-hidden shadow-2xl">
+<div class="bg-surface-container-high/50 p-4 border-b border-white/5 flex gap-2">
+<div class="w-3 h-3 rounded-full bg-surface-variant"></div>
+<div class="w-3 h-3 rounded-full bg-surface-variant"></div>
+<div class="w-3 h-3 rounded-full bg-surface-variant"></div>
+<span class="ml-4 text-xs font-code-block text-on-surface-variant">example_query.py</span>
+</div>
+<div class="p-6 font-code-block text-code-block">
+<pre class="text-[#c6bfff]"><span class="text-on-surface-variant">import</span> vectorvault
+
+vault = vectorvault.Client(<span class="text-tertiary">"api_key_..."</span>)
+
+<span class="text-on-surface-variant"># Query with automatic citation handling</span>
+response = vault.query(
+    vault_id=<span class="text-tertiary">"finance_docs"</span>,
+    prompt=<span class="text-tertiary">"Explain our Q3 revenue"</span>,
+    stream=<span class="text-primary">True</span>
+)</pre>
+<div class="mt-6 pt-6 border-t border-white/5">
+<div class="text-[10px] text-on-surface-variant uppercase tracking-widest mb-2">Response Preview</div>
+<pre class="text-tertiary">{
+  <span class="text-on-surface">"answer"</span>: <span class="text-tertiary">"Revenue grew 12% in Q3..."</span>,
+  <span class="text-on-surface">"citations"</span>: [<span class="text-primary">"q3_report.pdf"</span>],
+  <span class="text-on-surface">"latency"</span>: <span class="text-on-surface">142</span>
+}</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 7: Pricing -->
+<section class="py-24 relative z-10">
+<div class="max-w-container-max mx-auto px-margin-desktop text-center">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-4">Scalable Infrastructure</h2>
+<p class="text-on-surface-variant mb-16">Simple pricing that grows with your application.</p>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto text-left">
+<!-- Starter -->
+<div class="glass-panel p-8 rounded-2xl flex flex-col">
+<div class="mb-6">
+<h3 class="font-headline-md text-headline-md text-on-surface">Starter</h3>
+<div class="mt-4 flex items-baseline">
+<span class="text-display-lg-mobile font-headline-md text-on-surface">$0</span>
+<span class="text-on-surface-variant text-body-sm">/forever</span>
+</div>
+</div>
+<ul class="space-y-4 mb-10 flex-1">
+<li class="flex items-center gap-3 text-on-surface-variant text-body-sm">
+<span class="material-symbols-outlined text-tertiary text-sm">check_circle</span> 100k Chunks
+                        </li>
+<li class="flex items-center gap-3 text-on-surface-variant text-body-sm">
+<span class="material-symbols-outlined text-tertiary text-sm">check_circle</span> 2 Knowledge Vaults
+                        </li>
+<li class="flex items-center gap-3 text-on-surface-variant text-body-sm">
+<span class="material-symbols-outlined text-tertiary text-sm">check_circle</span> Community Support
+                        </li>
+</ul>
+<button class="w-full py-3 rounded-lg border border-white/10 hover:bg-white/5 font-bold transition-all">Get Started</button>
+</div>
+<!-- Pro -->
+<div class="glass-panel p-8 rounded-2xl flex flex-col relative border-primary/30 ring-1 ring-primary/20">
+<div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-on-primary px-4 py-1 rounded-full text-xs font-bold">POPULAR</div>
+<div class="mb-6">
+<h3 class="font-headline-md text-headline-md text-on-surface">Pro</h3>
+<div class="mt-4 flex items-baseline">
+<span class="text-display-lg-mobile font-headline-md text-on-surface">$49</span>
+<span class="text-on-surface-variant text-body-sm">/mo</span>
+</div>
+</div>
+<ul class="space-y-4 mb-10 flex-1">
+<li class="flex items-center gap-3 text-on-surface text-body-sm">
+<span class="material-symbols-outlined text-primary text-sm">check_circle</span> 5M Chunks
+                        </li>
+<li class="flex items-center gap-3 text-on-surface text-body-sm">
+<span class="material-symbols-outlined text-primary text-sm">check_circle</span> Unlimited Vaults
+                        </li>
+<li class="flex items-center gap-3 text-on-surface text-body-sm">
+<span class="material-symbols-outlined text-primary text-sm">check_circle</span> Advanced Reranking
+                        </li>
+<li class="flex items-center gap-3 text-on-surface text-body-sm">
+<span class="material-symbols-outlined text-primary text-sm">check_circle</span> Priority Support
+                        </li>
+</ul>
+<button class="w-full py-3 rounded-lg bg-primary text-on-primary font-bold hover:shadow-[0_0_15px_rgba(228,222,255,0.3)] transition-all">Go Pro</button>
+</div>
+<!-- Enterprise -->
+<div class="glass-panel p-8 rounded-2xl flex flex-col">
+<div class="mb-6">
+<h3 class="font-headline-md text-headline-md text-on-surface">Enterprise</h3>
+<div class="mt-4 flex items-baseline">
+<span class="text-display-lg-mobile font-headline-md text-on-surface">Custom</span>
+</div>
+</div>
+<ul class="space-y-4 mb-10 flex-1">
+<li class="flex items-center gap-3 text-on-surface-variant text-body-sm">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">check_circle</span> Unlimited Chunks
+                        </li>
+<li class="flex items-center gap-3 text-on-surface-variant text-body-sm">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">check_circle</span> VPC Deployment
+                        </li>
+<li class="flex items-center gap-3 text-on-surface-variant text-body-sm">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">check_circle</span> Dedicated Account Manager
+                        </li>
+</ul>
+<button class="w-full py-3 rounded-lg border border-white/10 hover:bg-white/5 font-bold transition-all">Contact Sales</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 8: Final CTA -->
+<section class="py-32 relative z-10 text-center px-margin-desktop">
+<div class="max-w-4xl mx-auto">
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg mb-8">
+                Your knowledge base, <span class="gradient-text">ready to answer.</span>
+</h2>
+<p class="text-on-surface-variant text-body-lg mb-12 max-w-2xl mx-auto">
+                Join 1,000+ engineers building the future of intelligent applications on Vector Vault.
+            </p>
+<button class="bg-primary text-on-primary px-10 py-5 rounded-xl font-bold text-headline-md hover:scale-105 transition-all shadow-xl shadow-primary/10">
+                Deploy Your First Vault
+            </button>
+</div>
+</section>
+<!-- Section 9: Footer -->
+<footer class="w-full py-16 border-t border-white/5 bg-surface relative z-10">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-gutter px-margin-desktop max-w-container-max mx-auto w-full">
+<div class="col-span-2 md:col-span-1">
+<span class="text-headline-md font-headline-md text-on-surface">Vector Vault</span>
+<p class="mt-4 text-body-sm text-on-surface-variant max-w-[200px]">The definitive platform for RAG infrastructure.</p>
+<div class="mt-6 flex gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-tertiary">public</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-tertiary">forum</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-tertiary">code</button>
+</div>
+</div>
+<div>
+<h4 class="text-label-md text-on-surface uppercase mb-6">Product</h4>
+<div class="flex flex-col gap-3">
+<a class="text-body-sm text-on-surface-variant hover:text-tertiary transition-colors" href="#">Pipeline</a>
+<a class="text-body-sm text-on-surface-variant hover:text-tertiary transition-colors" href="#">API</a>
+<a class="text-body-sm text-on-surface-variant hover:text-tertiary transition-colors" href="#">Changelog</a>
+<a class="text-body-sm text-on-surface-variant hover:text-tertiary transition-colors" href="#">Status</a>
+</div>
+</div>
+<div>
+<h4 class="text-label-md text-on-surface uppercase mb-6">Developers</h4>
+<div class="flex flex-col gap-3">
+<a class="text-body-sm text-on-surface-variant hover:text-tertiary transition-colors" href="#">Docs</a>
+<a class="text-body-sm text-on-surface-variant hover:text-tertiary transition-colors" href="#">Github</a>
+<a class="text-body-sm text-on-surface-variant hover:text-tertiary transition-colors" href="#">Discord</a>
+<a class="text-body-sm text-on-surface-variant hover:text-tertiary transition-colors" href="#">API Keys</a>
+</div>
+</div>
+<div>
+<h4 class="text-label-md text-on-surface uppercase mb-6">Company</h4>
+<div class="flex flex-col gap-3">
+<a class="text-body-sm text-on-surface-variant hover:text-tertiary transition-colors" href="#">About</a>
+<a class="text-body-sm text-on-surface-variant hover:text-tertiary transition-colors" href="#">Blog</a>
+<a class="text-body-sm text-on-surface-variant hover:text-tertiary transition-colors" href="#">Careers</a>
+<a class="text-body-sm text-on-surface-variant hover:text-tertiary transition-colors" href="#">Privacy</a>
+</div>
+</div>
+</div>
+<div class="mt-16 px-margin-desktop max-w-container-max mx-auto text-on-surface-variant text-body-sm opacity-50">
+            © 2024 Vector Vault AI Infrastructure.
+        </div>
+</footer>
+<script>
+        // Simple Scroll Animation Observer
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-up').forEach((el) => {
+            observer.observe(el);
+        });
+
+        // Hover lift on pricing cards
+        document.querySelectorAll('.glass-panel').forEach(card => {
+            card.classList.add('hover-lift');
+        });
+
+        // Navbar interaction
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 20) {
+                nav.classList.add('bg-surface/90', 'h-[72px]');
+                nav.classList.remove('h-[64px]');
+            } else {
+                nav.classList.remove('bg-surface/90', 'h-[72px]');
+                nav.classList.add('h-[64px]');
+            }
+        });
+    </script>
+</body></html>
