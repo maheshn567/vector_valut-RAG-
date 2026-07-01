@@ -33,9 +33,6 @@ export async function rerankChunks(query, chunks, topK) {
     throw new Error(`Reranking failed: ${result.error?.message || "Unknown error"}`);
   }
 
-  console.log("=== [Stage 3: Reranked Chunks] ===");
-  console.log(JSON.stringify(result.data.results, null, 2));
-
   // Keep only chunks with a cross-encoder score of 0.60 or higher
   const filteredResults = result.data.results.filter((item) => item.score >= 0.60);
 

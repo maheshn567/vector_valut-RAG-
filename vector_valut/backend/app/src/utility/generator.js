@@ -3,10 +3,10 @@
  * @param {string} query - The user query prompt
  * @param {Array} context - Context chunks with chunk_id, text, and score
  * @param {string} [systemPrompt] - Custom instruction prompt for the LLM
- * @param {string} [provider] - LLM provider (defaults to "openai")
+ * @param {string} [provider] - LLM provider (defaults to "nvidia")
  * @returns {Promise<Object>} - The generation result { answer, citations, usage }
  */
-export async function generateLlmAnswer(query, context, systemPrompt, provider = "openai") {
+export async function generateLlmAnswer(query, context, systemPrompt, provider = "nvidia") {
   const defaultSystemPrompt = "You are a helpful, professional AI assistant. Answer the question using the provided context chunks. If the context does not contain enough information to answer the question, state that you do not know. Keep your answer precise and accurate.";
 
   const response = await fetch("http://localhost:8000/generate", {

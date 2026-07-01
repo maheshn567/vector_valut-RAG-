@@ -95,8 +95,6 @@ export async function generateAnswer(req, res) {
     queryParams.push(candidateLimit);
 
     const matches = await prisma.$queryRawUnsafe(queryRawString, ...queryParams);
-    console.log("=== [Stage 2: Retrieved Chunks] ===");
-    console.log(JSON.stringify(matches, null, 2));
 
     if (!matches || matches.length === 0) {
       return res.status(200).json({
@@ -115,8 +113,6 @@ export async function generateAnswer(req, res) {
 
     // 7. Call Python LLM generation endpoint with reranked context via helper
     const generationData = await generateLlmAnswer(userPrompt, rerankedChunks);
-    console.log("=== [Stage 5: Context Sent to LLM] ===");
-    console.log(JSON.stringify(rerankedChunks, null, 2));
 
     // 8. Enrich LLM citations with parent Document metadata (ID and Name)
     let enrichedCitations = [];
@@ -153,9 +149,6 @@ export async function generateAnswer(req, res) {
         docName: docLookupMap[c.chunk_id]?.docName,
       }));
     }
-
-    console.log("=== [Stage 10: Final Citations Returned by API] ===");
-    console.log(JSON.stringify(enrichedCitations, null, 2));
 
     // 9. Save message turn to Conversation history if conversationId or userId is provided
     let activeConversationId = conversationId;

@@ -45,4 +45,4 @@ class GenerateRequest(BaseModel):
     query: str
     context: List[RetrievedResult]
     system_prompt: str
-    provider: str = "openai"
+    provider: str = "nvidia"
