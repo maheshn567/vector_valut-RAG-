@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vector Vault | RAG Query Interface</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Hanken+Grotesk:wght@600;700;800&family=JetBrains+Mono:wght@400;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@100..900&family=Inter:wght@100..900&family=JetBrains+Mono:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-panel {
+            background: rgba(17, 20, 28, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #273647;
+            border-radius: 10px;
+        }
+        .chat-input-container:focus-within {
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 1px #6c5ce7;
+        }
+        @keyframes subtle-glow {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        .thinking-indicator {
+            animation: subtle-glow 2s infinite ease-in-out;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed": "#6dfad2",
+                      "on-primary-fixed": "#160066",
+                      "primary-fixed": "#e4dfff",
+                      "on-error-container": "#ffdad6",
+                      "tertiary": "#ffb77d",
+                      "on-primary-fixed-variant": "#4029ba",
+                      "on-primary": "#2900a0",
+                      "on-surface": "#d4e4fa",
+                      "on-secondary": "#00382b",
+                      "surface-container-lowest": "#010f1f",
+                      "tertiary-fixed-dim": "#ffb77d",
+                      "on-tertiary-container": "#fff5f1",
+                      "on-secondary-fixed-variant": "#005140",
+                      "surface-container": "#122131",
+                      "primary": "#c6bfff",
+                      "surface-dim": "#051424",
+                      "inverse-primary": "#5847d2",
+                      "surface-container-highest": "#273647",
+                      "on-background": "#d4e4fa",
+                      "tertiary-container": "#ac5d00",
+                      "surface-bright": "#2c3a4c",
+                      "on-error": "#690005",
+                      "error": "#ffb4ab",
+                      "outline-variant": "#474554",
+                      "surface-container-high": "#1c2b3c",
+                      "inverse-on-surface": "#233143",
+                      "background": "#051424",
+                      "surface-variant": "#273647",
+                      "on-primary-container": "#faf6ff",
+                      "secondary": "#4bddb7",
+                      "error-container": "#93000a",
+                      "on-surface-variant": "#c8c4d7",
+                      "secondary-container": "#02b894",
+                      "outline": "#928ea0",
+                      "inverse-surface": "#d4e4fa",
+                      "primary-fixed-dim": "#c6bfff",
+                      "primary-container": "#6c5ce7",
+                      "surface-tint": "#c6bfff",
+                      "on-secondary-container": "#004233",
+                      "secondary-fixed-dim": "#4bddb7",
+                      "on-tertiary-fixed": "#2f1500",
+                      "on-tertiary-fixed-variant": "#6e3900",
+                      "surface-container-low": "#0d1c2d",
+                      "tertiary-fixed": "#ffdcc3",
+                      "on-tertiary": "#4d2600",
+                      "on-secondary-fixed": "#002018",
+                      "surface": "#051424"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "container-max": "1440px",
+                      "margin-mobile": "16px",
+                      "margin-desktop": "48px",
+                      "gutter": "24px"
+              },
+              "fontFamily": {
+                      "body-lg": ["Inter"],
+                      "headline-xl": ["Hanken Grotesk"],
+                      "body-md": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "headline-md": ["Hanken Grotesk"],
+                      "headline-lg": ["Hanken Grotesk"],
+                      "code-md": ["JetBrains Mono"],
+                      "label-caps": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "code-md": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                      "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md selection:bg-primary/30 h-screen overflow-hidden flex">
+<!-- SideNavBar (Authority: JSON & Design System) -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low border-r border-white/5 flex flex-col py-6 px-4 gap-4 z-50">
+<div class="flex items-center gap-3 px-2 mb-4">
+<div class="w-8 h-8 rounded bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary text-xl">security</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md text-primary font-bold leading-tight">Vector Vault</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Enterprise Plan</span>
+</div>
+</div>
+<button class="w-full bg-primary-container text-on-primary-container py-3 px-4 rounded-xl flex items-center justify-center gap-2 font-body-md hover:opacity-90 transition-all active:scale-95 mb-4">
+<span class="material-symbols-outlined">add</span>
+            New Conversation
+        </button>
+<nav class="flex-1 space-y-1 overflow-y-auto custom-scrollbar pr-1">
+<div class="text-on-surface-variant font-label-caps text-label-caps px-2 mb-2">History by App</div>
+<!-- App Group 1 -->
+<div class="mb-4">
+<div class="flex items-center gap-2 px-2 py-1.5 text-on-surface-variant font-medium text-sm">
+<span class="material-symbols-outlined text-sm">apps</span>
+                    Customer Support AI
+                </div>
+<div class="ml-4 space-y-1 mt-1">
+<a class="block px-3 py-2 text-primary font-bold bg-primary/10 rounded-lg font-body-sm text-body-sm" href="#">
+                        Ticket #4029 Resolution
+                    </a>
+<a class="block px-3 py-2 text-on-surface-variant font-body-sm text-body-sm hover:bg-surface-variant/50 hover:text-on-surface transition-all rounded-lg" href="#">
+                        Refund Policy Check
+                    </a>
+</div>
+</div>
+<!-- App Group 2 -->
+<div class="mb-4">
+<div class="flex items-center gap-2 px-2 py-1.5 text-on-surface-variant font-medium text-sm">
+<span class="material-symbols-outlined text-sm">apps</span>
+                    Legal Document Analyzer
+                </div>
+<div class="ml-4 space-y-1 mt-1">
+<a class="block px-3 py-2 text-on-surface-variant font-body-sm text-body-sm hover:bg-surface-variant/50 hover:text-on-surface transition-all rounded-lg" href="#">
+                        Service Agreement Review
+                    </a>
+<a class="block px-3 py-2 text-on-surface-variant font-body-sm text-body-sm hover:bg-surface-variant/50 hover:text-on-surface transition-all rounded-lg" href="#">
+                        Liability Clause Retrieval
+                    </a>
+</div>
+</div>
+</nav>
+<div class="pt-4 border-t border-white/5 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-caps text-label-caps">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-caps text-label-caps">Sign Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 ml-64 relative flex flex-col h-full bg-surface-dim">
+<!-- TopAppBar (Scope Selector) -->
+<header class="h-16 px-margin-desktop glass-panel flex items-center justify-between z-40 sticky top-0">
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5 bg-surface-container-highest/50 px-3 py-1.5 rounded-full border border-white/5">
+<span class="material-symbols-outlined text-primary text-sm">apps</span>
+<span class="font-label-caps text-label-caps text-on-surface">Legal Analyzer</span>
+<span class="material-symbols-outlined text-on-surface-variant text-xs">close</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container-highest/50 px-3 py-1.5 rounded-full border border-white/5">
+<span class="material-symbols-outlined text-secondary text-sm">description</span>
+<span class="font-label-caps text-label-caps text-on-surface">SLA_v2.pdf</span>
+<span class="material-symbols-outlined text-on-surface-variant text-xs">close</span>
+</div>
+<button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-variant/30 text-on-surface-variant">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">bolt</span>
+<span class="font-label-caps text-label-caps">Reranker: ON</span>
+</div>
+<div class="w-px h-4 bg-white/10"></div>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</header>
+<!-- Chat Area -->
+<div class="flex-1 overflow-y-auto custom-scrollbar px-margin-desktop py-8 flex justify-center">
+<div class="w-full max-w-3xl space-y-12 pb-32">
+<!-- User Message -->
+<div class="flex flex-col items-end group">
+<div class="flex items-center gap-2 mb-2 text-on-surface-variant group-hover:text-primary transition-colors">
+<span class="font-label-caps text-label-caps uppercase tracking-widest">You</span>
+</div>
+<div class="max-w-[85%] text-on-surface font-body-lg text-body-lg leading-relaxed">
+                        What are the specific termination clauses in this agreement for non-payment, and are there any grace periods mentioned?
+                    </div>
+</div>
+<!-- Assistant Message Card -->
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined">smart_toy</span>
+<span class="font-label-caps text-label-caps uppercase tracking-widest">Assistant</span>
+<span class="ml-2 px-1.5 py-0.5 rounded bg-primary/10 text-[10px] border border-primary/20 font-bold uppercase">RAG v2</span>
+</div>
+<div class="bg-surface-container-low/50 border-l-2 border-primary rounded-r-xl p-6 glass-panel">
+<!-- Answer Content -->
+<div class="prose prose-invert max-w-none text-on-surface font-body-md text-body-md space-y-4">
+<p>
+                                According to the provided Service Level Agreement (SLA_v2.pdf), the termination clauses for non-payment are strictly defined in Section 8.4.
+                            </p>
+<p>
+                                1. **Immediate Suspension**: The provider reserves the right to suspend all active vector database services if payment is overdue by more than 15 days [1].
+                            </p>
+<p>
+                                2. **Termination for Breach**: If the account remains delinquent for a total of 30 consecutive days, the agreement can be terminated for cause [2].
+                            </p>
+<p>
+                                3. **Grace Period**: There is a 5-day "administrative grace period" following the initial 15-day late mark during which the user will receive automated notifications before actual suspension occurs [3].
+                            </p>
+</div>
+<!-- Citations Section -->
+<div class="mt-8">
+<div class="flex items-center justify-between mb-3">
+<h4 class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">menu_book</span>
+                                    Citations
+                                </h4>
+</div>
+<div class="flex gap-4 overflow-x-auto pb-4 custom-scrollbar snap-x">
+<!-- Citation Card 1 -->
+<div class="min-w-[280px] bg-surface-container border border-white/5 rounded-lg p-4 snap-start hover:border-primary/30 transition-all group">
+<div class="flex items-center justify-between mb-2">
+<span class="font-code-md text-code-md text-primary bg-primary/10 px-1.5 rounded">[1]</span>
+<span class="font-label-caps text-label-caps text-secondary">0.942 Similarity</span>
+</div>
+<div class="text-on-surface-variant font-label-caps text-[11px] mb-2">SLA_v2.pdf • Page 12</div>
+<p class="text-on-surface text-sm line-clamp-3 leading-relaxed italic">"...overdue payments exceeding fifteen (15) calendar days shall constitute a material breach, authorizing the Provider to suspend API access..."</p>
+</div>
+<!-- Citation Card 2 -->
+<div class="min-w-[280px] bg-surface-container border border-white/5 rounded-lg p-4 snap-start hover:border-primary/30 transition-all group">
+<div class="flex items-center justify-between mb-2">
+<span class="font-code-md text-code-md text-primary bg-primary/10 px-1.5 rounded">[2]</span>
+<span class="font-label-caps text-label-caps text-secondary">0.891 Similarity</span>
+</div>
+<div class="text-on-surface-variant font-label-caps text-[11px] mb-2">SLA_v2.pdf • Page 13</div>
+<p class="text-on-surface text-sm line-clamp-3 leading-relaxed italic">"...failure to cure payment default within thirty (30) days allows for immediate termination of all underlying storage groups..."</p>
+</div>
+<!-- Citation Card 3 -->
+<div class="min-w-[280px] bg-surface-container border border-white/5 rounded-lg p-4 snap-start hover:border-primary/30 transition-all group">
+<div class="flex items-center justify-between mb-2">
+<span class="font-code-md text-code-md text-primary bg-primary/10 px-1.5 rounded">[3]</span>
+<span class="font-label-caps text-label-caps text-secondary">0.875 Similarity</span>
+</div>
+<div class="text-on-surface-variant font-label-caps text-[11px] mb-2">SLA_v2.pdf • Page 14</div>
+<p class="text-on-surface text-sm line-clamp-3 leading-relaxed italic">"...a notification buffer of five (5) business days is provided as a courtesy before technical lock-out protocols are initiated..."</p>
+</div>
+</div>
+</div>
+<!-- Retrieved Context Accordion -->
+<details class="mt-4 border-t border-white/5 group">
+<summary class="flex items-center justify-between py-3 cursor-pointer text-on-surface-variant hover:text-on-surface transition-colors list-none">
+<span class="font-label-caps text-label-caps">Show retrieved context (12 chunks)</span>
+<span class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
+</summary>
+<div class="py-4 space-y-3 font-code-md text-[13px]">
+<div class="grid grid-cols-12 gap-4 text-on-surface-variant border-b border-white/5 pb-2 uppercase tracking-tighter">
+<div class="col-span-1">ID</div>
+<div class="col-span-7">Content Excerpt</div>
+<div class="col-span-2">Vector Score</div>
+<div class="col-span-2">Reranked</div>
+</div>
+<div class="grid grid-cols-12 gap-4 text-secondary-fixed/80">
+<div class="col-span-1">#421</div>
+<div class="col-span-7 truncate italic">"Termination of Master Service Agreement for non-payment..."</div>
+<div class="col-span-2">0.812</div>
+<div class="col-span-2 font-bold text-secondary">0.988</div>
+</div>
+<div class="grid grid-cols-12 gap-4 text-secondary-fixed/80">
+<div class="col-span-1">#509</div>
+<div class="col-span-7 truncate italic">"Grace periods are calculated from the first date of..."</div>
+<div class="col-span-2">0.784</div>
+<div class="col-span-2 font-bold text-secondary">0.965</div>
+</div>
+</div>
+</details>
+<!-- Usage Footer -->
+<div class="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-on-surface-variant font-code-md text-xs">
+<div class="flex gap-4">
+<span>Input: 142 tokens</span>
+<span>Output: 318 tokens</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">timer</span>
+<span>Latency: 1.4s</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Empty State (Placeholder for dynamic loading) -->
+<div class="flex items-center gap-4 text-on-surface-variant/40 animate-pulse">
+<span class="material-symbols-outlined">pending</span>
+<span class="font-label-caps text-label-caps italic">AI is evaluating the next context window...</span>
+</div>
+</div>
+</div>
+<!-- Chat Input Fixed Bar -->
+<div class="absolute bottom-0 left-0 w-full p-margin-desktop bg-gradient-to-t from-surface-dim via-surface-dim/95 to-transparent">
+<div class="max-w-3xl mx-auto">
+<div class="chat-input-container glass-panel rounded-2xl p-2 transition-all shadow-2xl">
+<div class="flex items-center gap-2 px-2 pb-2 mb-2 border-b border-white/5">
+<button class="flex items-center gap-1.5 px-2 py-1 rounded bg-surface-container-highest text-on-surface-variant font-label-caps text-[10px] hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-sm">tune</span>
+                            TopK: 5
+                        </button>
+<button class="flex items-center gap-1.5 px-2 py-1 rounded bg-surface-container-highest text-on-surface-variant font-label-caps text-[10px] hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-sm">analytics</span>
+                            Temp: 0.1
+                        </button>
+</div>
+<div class="flex items-end gap-3 px-2 py-1">
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-primary transition-all">
+<span class="material-symbols-outlined">attach_file</span>
+</button>
+<textarea class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-on-surface-variant/50 py-2 font-body-md resize-none" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'" placeholder="Ask follow-up or query another document..." rows="1"></textarea>
+<button class="w-10 h-10 flex items-center justify-center bg-primary text-on-primary rounded-xl hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+</div>
+<div class="text-center mt-3 text-on-surface-variant/40 font-label-caps text-[10px] uppercase tracking-widest">
+                    Enterprise instance secure • SOC2 Compliant Encryption
+                </div>
+</div>
+</div>
+</main>
+<script>
+        // Micro-interactions for the chat interface
+        document.addEventListener('DOMContentLoaded', () => {
+            const textarea = document.querySelector('textarea');
+            textarea.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    // Simulate send action
+                    console.log('Sending message:', textarea.value);
+                    textarea.value = '';
+                    textarea.style.height = 'auto';
+                }
+            });
+
+            // Smooth horizontal scroll for citation cards
+            const citationScroll = document.querySelector('.overflow-x-auto');
+            if (citationScroll) {
+                citationScroll.addEventListener('wheel', (evt) => {
+                    evt.preventDefault();
+                    citationScroll.scrollLeft += evt.deltaY;
+                }, { passive: false });
+            }
+        });
+    </script>
+</body></html>
