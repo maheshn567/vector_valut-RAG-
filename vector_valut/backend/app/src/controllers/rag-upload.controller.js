@@ -81,6 +81,13 @@ export async function createRag(req, res) {
     // 4. Chunk the document pages using the utility helper
     const chunks = await chunkDocument(extractionData);
 
+    if (!chunks || chunks.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No extractable text was found in this document. Scanned images or empty documents cannot be vectorized.",
+      });
+    }
+
     // 5. Generate embeddings for all text chunks using the utility helper
     const embeddings = await embedChunks(chunks);
 

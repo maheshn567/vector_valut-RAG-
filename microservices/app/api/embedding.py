@@ -22,6 +22,19 @@ async def generate_embeddings(request: EmbedRequest,api_key: str = Depends(valid
         # 1. Extract just the text from the chunks to send to Voyage
         texts_to_embed = [chunk.text for chunk in request.chunks]
         
+        # Failsafe: if no chunks are provided, return an empty list immediately without hitting Voyage
+        if not texts_to_embed:
+            return {
+                "success": True,
+                "data": {
+                    "embeddings": []
+                },
+                "error": None,
+                "metadata": {
+                    "processing_time_ms": 0
+                }
+            }
+        
         # 2. Call the Voyage provider
         vectors = voyage_provider.embed(texts_to_embed)
         
