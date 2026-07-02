@@ -27,7 +27,7 @@ async def extract_content(request: Request,api_key: str = Depends(validate_api_k
     if "multipart/form-data" in content_type:
         form = await request.form()
         form_file = form.get("file")
-        if form_file and isinstance(form_file, UploadFile):
+        if form_file and hasattr(form_file, "file"):
             file_bytes = await form_file.read()
             filename = form_file.filename
             file_content_type = form_file.content_type
