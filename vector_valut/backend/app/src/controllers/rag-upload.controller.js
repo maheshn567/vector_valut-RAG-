@@ -152,6 +152,11 @@ export async function getAllRag(req, res) {
         tenantId: tenantId,
         ...(groupId ? { groupId } : {}),
       },
+      include: {
+        _count: {
+          select: { chunks: true },
+        },
+      },
     });
 
     return res.status(200).json({
@@ -168,7 +173,7 @@ export async function getAllRag(req, res) {
   }
 }
 
-// Fetch a single document's metadata
+// Fetch a single document's metadata and chunks
 export async function getRag(req, res) {
   const { docId } = req.body;
   const tenantId = req.tenantId;
@@ -184,6 +189,16 @@ export async function getRag(req, res) {
     const data = await prisma.document.findUnique({
       where: {
         docId: docId,
+      },
+      include: {
+        chunks: {
+          select: {
+            chunkId: true,
+            text: true,
+            metadata: true,
+            createdAt: true,
+          },
+        },
       },
     });
 

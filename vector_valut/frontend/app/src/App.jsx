@@ -5,6 +5,7 @@ import Login from "./pages/Login"
 import TenantDashboard from "./pages/Tenant-DashboardPage"
 import TenantAppPage from "./pages/TenantAppPage"
 import CorporaPage from "./pages/CorporaPage"
+import DocumentsPage from "./pages/DocumentPage"
 import { Route, Routes, useLocation } from "react-router-dom"
 
 export default function App() {
@@ -14,7 +15,8 @@ export default function App() {
     location.pathname === "/signup" || 
     location.pathname.startsWith("/dashboard") ||
     location.pathname.startsWith("/apps") ||
-    location.pathname.startsWith("/corpora");
+    location.pathname.startsWith("/corpora") ||
+    location.pathname.startsWith("/documents");
 
   return (
     <div className="flex flex-col min-h-screen bg-[#051424]">
@@ -29,6 +31,7 @@ export default function App() {
           <Route path="/dashboard" element={<TenantDashboard />} />
           <Route path="/apps" element={<TenantAppPage />} />
           <Route path="/corpora" element={<CorporaPage />} />
+          <Route path="/documents" element={<DocumentsPage />} />
         </Routes>
       </main>
 
