@@ -1,5 +1,7 @@
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import prisma from "../../../prisma/index.js";
+import { auth } from "../lib/auth.js";
 
 const JWT_SECRET = process.env.JWT_SECRET_KEY || "your-fallback-super-secret-key";
 
@@ -8,10 +10,38 @@ const JWT_SECRET = process.env.JWT_SECRET_KEY || "your-fallback-super-secret-key
  */
 export async function verifyJWT(req, res, next) {
   try {
-    // 1. Read token from HTTP-only cookies
+    // 1. Check for Better-Auth session (e.g. Google Sign-In)
+    const session = await auth.api.getSession({
+      headers: req.headers,
+    });
+
+    if (session && session.user) {
+      // Find or dynamically create a Tenant workspace record for the OAuth user
+      let tenant = await prisma.tenant.findUnique({
+        where: { email: session.user.email },
+      });
+
+      if (!tenant) {
+        tenant = await prisma.tenant.create({
+          data: {
+            name: session.user.name,
+            email: session.user.email,
+            password: "", // Social sign-ins don't store passwords
+            orgName: `${session.user.name}'s Org`,
+            s3BucketName: `tenant-${crypto.randomUUID().slice(0, 8)}`,
+          },
+        });
+      }
+
+      req.tenantId = tenant.tenantId;
+      req.user = session.user;
+      return next();
+    }
+
+    // 2. Fallback to custom JWT token check (Standard credentials flow)
     let token = req.cookies?.token;
 
-    // 2. Fallback to Authorization header if cookies aren't used
+    // Fallback to Authorization header if cookies aren't used
     if (!token) {
       const authHeader = req.headers["authorization"];
       if (authHeader && authHeader.startsWith("Bearer ")) {
