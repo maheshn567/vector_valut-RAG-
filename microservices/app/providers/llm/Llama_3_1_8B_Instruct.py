@@ -84,11 +84,17 @@ class Llama318BInstructProvider(LLMProvider):
             if cid in cited_uuids:
                 citations.append({"chunk_id": cid})
 
+        # 6. Clean up raw UUID citation IDs from the answer text
+        cleaned_answer = re.sub(rf'\[{uuid_pattern}\]', '', answer)
+        cleaned_answer = re.sub(rf'\({uuid_pattern}\)', '', cleaned_answer)
+        cleaned_answer = re.sub(uuid_pattern, '', cleaned_answer)
+        cleaned_answer = re.sub(r' +', ' ', cleaned_answer).replace(" .", ".").strip()
+
         print("=== [Stage 9: Parsed Citations] ===")
         print(citations)
         
         return {
-            "answer": answer,
+            "answer": cleaned_answer,
             "citations": citations,
             "usage": usage
         }
