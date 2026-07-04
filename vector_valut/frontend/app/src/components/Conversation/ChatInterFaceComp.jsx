@@ -158,6 +158,9 @@ export default function ChatInterFaceComp({ messages = [], isLoading }) {
             </div>
           </div>
         )}
+        
+        {/* Bottom spacing spacer so prompt box doesn't overlap text when scrolled to bottom */}
+        <div className="h-44 shrink-0 pointer-events-none"></div>
       </div>
 
       {/* Citation Detail Inspector Modal */}
