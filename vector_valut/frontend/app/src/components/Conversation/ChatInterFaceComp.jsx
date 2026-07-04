@@ -1,6 +1,55 @@
 import { useEffect, useRef, useState } from "react";
 import LLM_response_fromater from "../../utility/LLM_response_fromater.jsx";
 
+// STATEFUL ACCORDION CITATION DROPDOWN COMPONENT
+function CitationsDropdown({ citations, onSelectCitation }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="pt-4 border-t border-white/5">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 text-[11px] font-mono text-primary hover:text-primary/80 transition-colors font-bold uppercase tracking-wider cursor-pointer bg-transparent border-none p-0 outline-none select-none"
+      >
+        <span
+          className="material-symbols-outlined text-[18px] transition-transform duration-200"
+          style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)" }}
+        >
+          chevron_right
+        </span>
+        <span>Retrieved Citations ({citations.length} chunks)</span>
+      </button>
+
+      {isOpen && (
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 transition-all duration-300">
+          {citations.map((citation, citIdx) => (
+            <div
+              key={citIdx}
+              onClick={() => onSelectCitation(citation)}
+              className="bg-[#0e1c2d] border border-white/5 p-3 rounded-lg hover:border-[#6C5CE7]/50 hover:bg-[#122031] transition-all cursor-pointer"
+              title="Click to view full cited text chunk"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-bold text-primary truncate w-40">
+                  {citation.docName || "Document Reference"}
+                </span>
+                {citation.similarity !== undefined && (
+                  <span className="text-[10px] font-mono text-[#6dfad2] shrink-0">
+                    {(citation.similarity * 100).toFixed(0)}% Score
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-on-surface-variant line-clamp-2 italic">
+                {citation.text || "Click to preview citation chunk details..."}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ChatInterFaceComp({ messages = [], isLoading }) {
   const canvasRef = useRef(null);
   const [selectedCitation, setSelectedCitation] = useState(null);
@@ -78,37 +127,12 @@ export default function ChatInterFaceComp({ messages = [], isLoading }) {
                 <div className="glass-panel rounded-2xl border-l-4 border-l-[#6C5CE7] p-6 space-y-4">
                   <LLM_response_fromater response={msg.content} />
 
-                  {/* Retrieved Citations Section */}
+                  {/* Collapsible Citations Dropdown */}
                   {msg.citations && msg.citations.length > 0 && (
-                    <div className="pt-4 border-t border-white/5">
-                      <h4 className="text-[10px] uppercase font-bold text-on-surface-variant mb-3 tracking-widest font-mono">
-                        Retrieved Citations
-                      </h4>
-                      <div className="flex gap-3 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-thin">
-                        {msg.citations.map((citation, citIdx) => (
-                          <div
-                            key={citIdx}
-                            onClick={() => setSelectedCitation(citation)}
-                            className="min-w-[200px] max-w-[240px] bg-[#0e1c2d] border border-white/5 p-3 rounded-lg hover:border-[#6C5CE7]/50 hover:bg-[#122031] transition-all cursor-pointer shrink-0"
-                            title="Click to view full cited text chunk"
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-[11px] font-bold text-primary truncate w-24">
-                                {citation.docName || "Document Reference"}
-                              </span>
-                              {citation.similarity !== undefined && (
-                                <span className="text-[10px] font-mono text-[#6dfad2]">
-                                  {(citation.similarity * 100).toFixed(0)}% Score
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-[11px] text-on-surface-variant line-clamp-2 italic">
-                              {citation.text || "Click to preview citation chunk details..."}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                    <CitationsDropdown
+                      citations={msg.citations}
+                      onSelectCitation={setSelectedCitation}
+                    />
                   )}
                 </div>
                 <span className="text-[10px] font-mono text-on-surface-variant">
@@ -158,7 +182,7 @@ export default function ChatInterFaceComp({ messages = [], isLoading }) {
             </div>
           </div>
         )}
-        
+
         {/* Bottom spacing spacer so prompt box doesn't overlap text when scrolled to bottom */}
         <div className="h-44 shrink-0 pointer-events-none"></div>
       </div>
