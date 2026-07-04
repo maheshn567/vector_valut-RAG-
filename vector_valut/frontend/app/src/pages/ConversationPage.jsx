@@ -64,8 +64,8 @@ export default function ConversationPage() {
 
   // Fetch list of conversations whenever tenant or selectedApp changes
   const loadConversations = useCallback(async () => {
-    if (!tenant) return;
-    const userId = tenant.email || "default-tenant-user";
+    if (!tenant || !tenant.tenantId) return;
+    const userId = tenant.tenantId;
     try {
       const res = await listConversations(userId);
       if (res.success && res.data) {
@@ -146,7 +146,11 @@ export default function ConversationPage() {
       return;
     }
 
-    const userId = tenant?.email || "default-tenant-user";
+    const userId = tenant?.tenantId;
+    if (!userId) {
+      toast.error("User context is not fully loaded yet.");
+      return;
+    }
 
     // 1. Append user prompt locally
     const userMsg = {
