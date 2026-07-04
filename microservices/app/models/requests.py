@@ -47,3 +47,9 @@ class GenerateRequest(BaseModel):
     system_prompt: str
     provider: str = "nvidia"
     history: Optional[List[Dict[str, str]]] = None
+
+# VOICE ASSISTANT REQUEST
+class VoiceChatRequest(BaseModel):
+    query: Optional[str] = None
+    provider: str = "nvidia"
+    audio: Optional[UploadFile] = None

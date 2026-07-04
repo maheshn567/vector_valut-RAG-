@@ -55,3 +55,8 @@ class GenerateResponse(BaseModel):
     answer: str
     citations: List[Citation]
     usage: TokenUsage
+
+# VOICE ASSISTANT RESPONSE
+class VoiceChatResponse(BaseModel):
+    answer: str
+    audio: Optional[bytes] = None

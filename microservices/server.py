@@ -10,6 +10,8 @@ from app.api.chunking import router as chunking_router
 from app.api.embedding import router as embedding_router
 from app.api.reranking import router as reranking_router
 from app.api.generation import router as generation_router
+from app.api.transcribe import router as transcribe_router
+from app.api.translation import router as translation_router
 
 
 app = FastAPI(
@@ -32,6 +34,8 @@ app.include_router(chunking_router)
 app.include_router(embedding_router)
 app.include_router(reranking_router)
 app.include_router(generation_router)
+app.include_router(transcribe_router)
+app.include_router(translation_router)
 
 @app.get("/")
 async def root():
