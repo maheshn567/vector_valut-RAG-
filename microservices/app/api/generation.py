@@ -31,7 +31,8 @@ async def generate_answer(request: GenerateRequest,api_key: str = Depends(valida
                 llm_response = llama_llm.generate(
                     query=request.query,
                     context=context_dicts,
-                    system_prompt=request.system_prompt
+                    system_prompt=request.system_prompt,
+                    history=request.history
                 )
                 used_provider = "nvidia (llama-3.1-8b-instruct)"
             except Exception as nvidia_error:
@@ -39,14 +40,16 @@ async def generate_answer(request: GenerateRequest,api_key: str = Depends(valida
                 llm_response = openai_llm.generate(
                     query=request.query,
                     context=context_dicts,
-                    system_prompt=request.system_prompt
+                    system_prompt=request.system_prompt,
+                    history=request.history
                 )
                 used_provider = "openai (fallback)"
         elif prov_lower == "openai":
             llm_response = openai_llm.generate(
                 query=request.query,
                 context=context_dicts,
-                system_prompt=request.system_prompt
+                system_prompt=request.system_prompt,
+                history=request.history
             )
             used_provider = "openai"
         else:

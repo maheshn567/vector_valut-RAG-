@@ -6,7 +6,7 @@
  * @param {string} [provider] - LLM provider (defaults to "nvidia")
  * @returns {Promise<Object>} - The generation result { answer, citations, usage }
  */
-export async function generateLlmAnswer(query, context, systemPrompt, provider = "nvidia") {
+export async function generateLlmAnswer(query, context, systemPrompt, provider = "nvidia", history = []) {
   const defaultSystemPrompt = "You are a helpful, professional AI assistant. Answer the question using the provided context chunks. If the context does not contain enough information to answer the question, state that you do not know. Keep your answer precise and accurate.";
 
   const response = await fetch("http://localhost:8000/generate", {
@@ -24,6 +24,7 @@ export async function generateLlmAnswer(query, context, systemPrompt, provider =
       })),
       system_prompt: systemPrompt || defaultSystemPrompt,
       provider,
+      history,
     }),
   });
 

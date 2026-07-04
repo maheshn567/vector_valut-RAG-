@@ -108,11 +108,31 @@ export async function generateAnswer(req, res) {
       });
     }
 
+    // Fetch previous conversation context history if conversationId is specified
+    let conversationHistory = [];
+    if (conversationId) {
+      const conversation = await prisma.conversation.findFirst({
+        where: { conversationId, tenantId },
+      });
+      if (conversation && Array.isArray(conversation.messages)) {
+        conversationHistory = conversation.messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        }));
+      }
+    }
+
     // 6. Call Python reranking microservice to refine context selection via helper
     const rerankedChunks = await rerankChunks(userPrompt, matches, finalTopK);
 
     // 7. Call Python LLM generation endpoint with reranked context via helper
-    const generationData = await generateLlmAnswer(userPrompt, rerankedChunks);
+    const generationData = await generateLlmAnswer(
+      userPrompt,
+      rerankedChunks,
+      undefined,
+      undefined,
+      conversationHistory
+    );
 
     // 8. Enrich LLM citations with parent Document metadata (ID and Name)
     let enrichedCitations = [];
