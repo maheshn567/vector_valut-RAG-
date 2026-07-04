@@ -187,13 +187,23 @@ export async function generateAnswer(req, res) {
           { role: "assistant", content: generationData.answer, citations: enrichedCitations, timestamp: new Date() }
         ];
 
+        const currentMetadata = conversation.metadata && typeof conversation.metadata === 'object' ? conversation.metadata : {};
+        const updatedMetadata = {
+          ...currentMetadata,
+          lastMessageExcerpt: userPrompt.trim().slice(0, 60) + (userPrompt.trim().length > 60 ? "..." : "")
+        };
+
         await prisma.conversation.update({
           where: { conversationId: activeConversationId },
-          data: { messages: updatedMessages },
+          data: { 
+            messages: updatedMessages,
+            metadata: updatedMetadata
+          },
         });
       }
     } else if (userId && resolvedAppId) {
       // Create a new conversation dynamically
+      const title = userPrompt.trim().slice(0, 35) + (userPrompt.trim().length > 35 ? "..." : "");
       const newConversation = await prisma.conversation.create({
         data: {
           tenantId,
@@ -203,7 +213,10 @@ export async function generateAnswer(req, res) {
             { role: "user", content: userPrompt, timestamp: new Date() },
             { role: "assistant", content: generationData.answer, citations: enrichedCitations, timestamp: new Date() }
           ],
-          metadata: {},
+          metadata: {
+            title: title,
+            lastMessageExcerpt: userPrompt.trim().slice(0, 60) + (userPrompt.trim().length > 60 ? "..." : "")
+          },
         },
       });
       activeConversationId = newConversation.conversationId;
