@@ -275,17 +275,6 @@ export default function ConversationPage() {
 
         {/* PANEL 3: CHAT AREA */}
         <main className="flex-1 bg-transparent flex flex-col relative z-10">
-          {/* Toggle history expand trigger when collapsed */}
-          {!isHistoryOpen && (
-            <button
-              onClick={() => setIsHistoryOpen(true)}
-              className="absolute left-4 top-4 z-40 w-10 h-10 bg-[#1D2B3C]/80 border border-white/10 rounded-full flex items-center justify-center text-[#e4deff] shadow-2xl hover:bg-[#6C5CE7]/20 transition-all active:scale-95 cursor-pointer"
-              title="Expand History"
-            >
-              <span className="material-symbols-outlined">history</span>
-            </button>
-          )}
-
           {/* Navigation / Chat Settings Header */}
           <ConversationNavComp
             apps={apps}
@@ -296,6 +285,8 @@ export default function ConversationPage() {
             onDocChange={setSelectedDocId}
             rerankerOn={rerankerOn}
             onRerankerToggle={() => setRerankerOn(!rerankerOn)}
+            isHistoryOpen={isHistoryOpen}
+            onExpandHistory={() => setIsHistoryOpen(true)}
           />
 
           {/* Chat Messages Canvas */}

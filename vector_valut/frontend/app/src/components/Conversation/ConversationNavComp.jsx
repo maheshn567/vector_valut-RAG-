@@ -9,11 +9,22 @@ export default function ConversationNavComp({
   onDocChange,
   rerankerOn,
   onRerankerToggle,
+  isHistoryOpen,
+  onExpandHistory,
 }) {
   return (
     <header className="h-16 bg-[#11141C]/75 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-6 shrink-0 z-15">
       {/* Dropdown Selectors on Left */}
       <div className="flex items-center gap-3">
+        {!isHistoryOpen && (
+          <button
+            onClick={onExpandHistory}
+            className="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-white/5 rounded-md transition-all cursor-pointer mr-1 flex items-center justify-center"
+            title="Expand History"
+          >
+            <span className="material-symbols-outlined text-[20px]">history</span>
+          </button>
+        )}
         {/* App Selection Dropdown */}
         <div className="flex items-center gap-2 px-3 py-1 bg-[#122031] rounded-full border border-white/5 text-[12px] font-mono">
           <span className="material-symbols-outlined text-[16px] text-[#e4deff]">apps</span>
