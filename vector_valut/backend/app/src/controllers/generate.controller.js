@@ -147,6 +147,7 @@ export async function generateAnswer(req, res) {
         select: {
           chunkId: true,
           docId: true,
+          text: true,
           document: {
             select: {
               docName: true,
@@ -160,6 +161,7 @@ export async function generateAnswer(req, res) {
         docLookupMap[item.chunkId] = {
           docId: item.docId,
           docName: item.document?.docName || "Unknown Document",
+          text: item.text,
         };
       }
 
@@ -167,6 +169,7 @@ export async function generateAnswer(req, res) {
         chunk_id: c.chunk_id,
         docId: docLookupMap[c.chunk_id]?.docId,
         docName: docLookupMap[c.chunk_id]?.docName,
+        text: docLookupMap[c.chunk_id]?.text,
       }));
     }
 
