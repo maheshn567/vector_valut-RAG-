@@ -7,7 +7,7 @@ export const retrieveContext = (data) => api.post("/query/retrieve", data);
 export const getContext = (data) => api.post("/query/context", data);
 
 // Ask query to the LLM (RAG with citations and history update)
-export const askLlm = (data) => api.post("/query/ask", data);
+export const askLlm = (data, config = {}) => api.post("/query/ask", data, config);
 
 const queryApi = {
   retrieveContext,
