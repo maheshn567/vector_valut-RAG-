@@ -21,7 +21,7 @@ class Llama318BInstructProvider(LLMProvider):
             )
         return self.client
 
-    def generate(self, query: str, context: List[Dict[str, Any]], system_prompt: str) -> Dict[str, Any]:
+    def generate(self, query: str, context: List[Dict[str, Any]], system_prompt: str, history: List[Dict[str, str]] = None) -> Dict[str, Any]:
         client = self._get_client()
 
         # 1. Format the context so the LLM can read it and attribute it
@@ -43,13 +43,17 @@ class Llama318BInstructProvider(LLMProvider):
         )
         augmented_system_prompt = system_prompt + citation_instructions
 
-        # 3. Call the NVIDIA Chat Completions API
+        # 3. Compile the messages payload with system, history context, and latest prompt
+        messages = [{"role": "system", "content": augmented_system_prompt}]
+        if history:
+            for item in history:
+                messages.append({"role": item["role"], "content": item["content"]})
+        messages.append({"role": "user", "content": final_prompt})
+
+        # 4. Call the NVIDIA Chat Completions API
         response = client.chat.completions.create(
             model=self.model,
-            messages=[
-                {"role": "system", "content": augmented_system_prompt},
-                {"role": "user", "content": final_prompt}
-            ],
+            messages=messages,
             temperature=0.2,
             top_p=0.7,
             max_tokens=1024,
@@ -80,11 +84,17 @@ class Llama318BInstructProvider(LLMProvider):
             if cid in cited_uuids:
                 citations.append({"chunk_id": cid})
 
+        # 6. Clean up raw UUID citation IDs from the answer text
+        cleaned_answer = re.sub(rf'\[{uuid_pattern}\]', '', answer)
+        cleaned_answer = re.sub(rf'\({uuid_pattern}\)', '', cleaned_answer)
+        cleaned_answer = re.sub(uuid_pattern, '', cleaned_answer)
+        cleaned_answer = re.sub(r' +', ' ', cleaned_answer).replace(" .", ".").strip()
+
         print("=== [Stage 9: Parsed Citations] ===")
         print(citations)
         
         return {
-            "answer": answer,
+            "answer": cleaned_answer,
             "citations": citations,
             "usage": usage
         }

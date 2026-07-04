@@ -46,3 +46,4 @@ class GenerateRequest(BaseModel):
     context: List[RetrievedResult]
     system_prompt: str
     provider: str = "nvidia"
+    history: Optional[List[Dict[str, str]]] = None

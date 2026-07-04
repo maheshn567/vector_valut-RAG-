@@ -6,6 +6,7 @@ import TenantDashboard from "./pages/Tenant-DashboardPage"
 import TenantAppPage from "./pages/TenantAppPage"
 import CorporaPage from "./pages/CorporaPage"
 import DocumentsPage from "./pages/DocumentPage"
+import ConversationPage from "./pages/ConversationPage"
 import { Route, Routes, useLocation } from "react-router-dom"
 
 export default function App() {
@@ -16,7 +17,8 @@ export default function App() {
     location.pathname.startsWith("/dashboard") ||
     location.pathname.startsWith("/apps") ||
     location.pathname.startsWith("/corpora") ||
-    location.pathname.startsWith("/documents");
+    location.pathname.startsWith("/documents") ||
+    location.pathname.startsWith("/conversations");
 
   return (
     <div className="flex flex-col min-h-screen bg-[#051424]">
@@ -32,6 +34,7 @@ export default function App() {
           <Route path="/apps" element={<TenantAppPage />} />
           <Route path="/corpora" element={<CorporaPage />} />
           <Route path="/documents" element={<DocumentsPage />} />
+          <Route path="/conversations" element={<ConversationPage />} />
         </Routes>
       </main>
 

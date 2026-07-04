@@ -108,11 +108,31 @@ export async function generateAnswer(req, res) {
       });
     }
 
+    // Fetch previous conversation context history if conversationId is specified
+    let conversationHistory = [];
+    if (conversationId) {
+      const conversation = await prisma.conversation.findFirst({
+        where: { conversationId, tenantId },
+      });
+      if (conversation && Array.isArray(conversation.messages)) {
+        conversationHistory = conversation.messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        }));
+      }
+    }
+
     // 6. Call Python reranking microservice to refine context selection via helper
     const rerankedChunks = await rerankChunks(userPrompt, matches, finalTopK);
 
     // 7. Call Python LLM generation endpoint with reranked context via helper
-    const generationData = await generateLlmAnswer(userPrompt, rerankedChunks);
+    const generationData = await generateLlmAnswer(
+      userPrompt,
+      rerankedChunks,
+      undefined,
+      undefined,
+      conversationHistory
+    );
 
     // 8. Enrich LLM citations with parent Document metadata (ID and Name)
     let enrichedCitations = [];
@@ -127,6 +147,7 @@ export async function generateAnswer(req, res) {
         select: {
           chunkId: true,
           docId: true,
+          text: true,
           document: {
             select: {
               docName: true,
@@ -140,6 +161,7 @@ export async function generateAnswer(req, res) {
         docLookupMap[item.chunkId] = {
           docId: item.docId,
           docName: item.document?.docName || "Unknown Document",
+          text: item.text,
         };
       }
 
@@ -147,6 +169,7 @@ export async function generateAnswer(req, res) {
         chunk_id: c.chunk_id,
         docId: docLookupMap[c.chunk_id]?.docId,
         docName: docLookupMap[c.chunk_id]?.docName,
+        text: docLookupMap[c.chunk_id]?.text,
       }));
     }
 
@@ -167,13 +190,23 @@ export async function generateAnswer(req, res) {
           { role: "assistant", content: generationData.answer, citations: enrichedCitations, timestamp: new Date() }
         ];
 
+        const currentMetadata = conversation.metadata && typeof conversation.metadata === 'object' ? conversation.metadata : {};
+        const updatedMetadata = {
+          ...currentMetadata,
+          lastMessageExcerpt: userPrompt.trim().slice(0, 60) + (userPrompt.trim().length > 60 ? "..." : "")
+        };
+
         await prisma.conversation.update({
           where: { conversationId: activeConversationId },
-          data: { messages: updatedMessages },
+          data: { 
+            messages: updatedMessages,
+            metadata: updatedMetadata
+          },
         });
       }
     } else if (userId && resolvedAppId) {
       // Create a new conversation dynamically
+      const title = userPrompt.trim().slice(0, 35) + (userPrompt.trim().length > 35 ? "..." : "");
       const newConversation = await prisma.conversation.create({
         data: {
           tenantId,
@@ -183,7 +216,10 @@ export async function generateAnswer(req, res) {
             { role: "user", content: userPrompt, timestamp: new Date() },
             { role: "assistant", content: generationData.answer, citations: enrichedCitations, timestamp: new Date() }
           ],
-          metadata: {},
+          metadata: {
+            title: title,
+            lastMessageExcerpt: userPrompt.trim().slice(0, 60) + (userPrompt.trim().length > 60 ? "..." : "")
+          },
         },
       });
       activeConversationId = newConversation.conversationId;
