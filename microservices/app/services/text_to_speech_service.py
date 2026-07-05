@@ -10,10 +10,12 @@ import base64
 
 async def audio_response(text: str):
     try:
+        # Prepend vocal directions to steer the generative model to a robotic monotone delivery
+        steered_text = f"[monotone, robotic] {text}"
         response = client.audio.speech.create(
             model="canopylabs/orpheus-v1-english",
             voice="troy",
-            input=text,
+            input=steered_text,
             response_format="wav"
         )
         audio_bytes = response.read()

@@ -1,5 +1,4 @@
 import json
-import base64
 from groq import Groq
 from fastapi import UploadFile, File, APIRouter
 from app.models.response import VoiceChatResponse
@@ -24,8 +23,7 @@ async def transcribe(request: VoiceChatRequest) -> VoiceChatResponse:
     else:
         text_content = request.query
 
-    # Generate TTS audio base64 and decode to bytes
-    tts_audio_base64 = await audio_response(text_content) if text_content else None
-    tts_audio = base64.b64decode(tts_audio_base64) if tts_audio_base64 else None
+    # Generate TTS audio base64 string
+    tts_audio = await audio_response(text_content) if text_content else None
     
     return VoiceChatResponse(answer=text_content, audio=tts_audio)

@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function UserPromptBoxComp({
   onSend,
@@ -10,6 +11,7 @@ export default function UserPromptBoxComp({
   strategy,
   setStrategy,
 }) {
+  const navigate = useNavigate();
   const [prompt, setPrompt] = useState("");
   const textareaRef = useRef(null);
 
@@ -130,6 +132,14 @@ export default function UserPromptBoxComp({
               title="Attach context file (mock)"
             >
               <span className="material-symbols-outlined text-[20px]">attach_file</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/voice-assistant")}
+              className="w-10 h-10 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-on-surface-variant hover:bg-white/10 hover:text-[#6dfad2] transition-all group cursor-pointer"
+              title="Voice Assistant"
+            >
+              <span className="material-symbols-outlined text-[20px] group-hover:text-[#6dfad2]">mic</span>
             </button>
             <button
               onClick={handleSubmit}

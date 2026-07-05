@@ -92,7 +92,6 @@ class Llama318BInstructProvider(LLMProvider):
 
         print("=== [Stage 9: Parsed Citations] ===")
         print(citations)
-        
         return {
             "answer": cleaned_answer,
             "citations": citations,
