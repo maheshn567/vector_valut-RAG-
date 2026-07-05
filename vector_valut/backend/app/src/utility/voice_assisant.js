@@ -36,7 +36,8 @@ export default async function process_voice(text = null, audio_file = null, tran
       throw new Error(`Voice microservice failed: ${response.statusText} (${errText})`);
     }
 
-    return await response.json();
+    const data = await response.json();
+    return { success: true, data };
   } catch (error) {
     console.error("Error inside process_voice utility:", error);
     return { success: false, error: { message: error.message } };

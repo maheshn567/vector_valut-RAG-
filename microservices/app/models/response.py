@@ -59,4 +59,4 @@ class GenerateResponse(BaseModel):
 # VOICE ASSISTANT RESPONSE
 class VoiceChatResponse(BaseModel):
     answer: str
-    audio: Optional[bytes] = None
+    audio: Optional[str] = None
