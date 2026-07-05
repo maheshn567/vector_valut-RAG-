@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Hooks/useAuthHook";
 import ShaderBackground from "../components/Conversation/voice-assiant/ShaderBackground";
@@ -12,48 +12,15 @@ export default function VoiceTranscriptPage() {
   const [sessionTime, setSessionTime] = useState("04:32");
   const transcriptEndRef = useRef(null);
 
-  // Pre-populated demo conversation history (as defined in design mockup) if history is empty
-  const defaultMessages = [
-    {
-      id: "demo-1",
-      role: "user",
-      text: "Can you explain the general termination clauses for this SLA? I'm looking for notice periods specifically.",
-      time: "01:14"
-    },
-    {
-      id: "demo-2",
-      role: "assistant",
-      text: "Under Section 8.4 (Notice of Default), the agreement stipulates a 15-day grace period following a written notice of breach. If the breach is not cured within this window, the non-breaching party may terminate immediately.",
-      time: "01:16",
-      citations: [{ docName: "SLA_V4_FINAL.pdf (p. 22)" }]
-    },
-    {
-      id: "demo-3",
-      role: "user",
-      text: "What happens if we choose to terminate early without a breach? Is there a financial penalty involved?",
-      time: "03:45"
-    },
-    {
-      id: "demo-4",
-      role: "assistant",
-      text: "Yes, Section 12.1 (Termination for Convenience) specifies that early termination by the client requires a 25% penalty fee of the remaining contract value. This is calculated based on the average monthly billing over the last quarter.",
-      time: "03:47",
-      citations: [{ docName: "Fee_Schedule_Exhibit_C.pdf" }]
-    }
-  ];
-
-  // Load message logs from local storage or fallback to defaults
+  // Load message logs from local storage
   useEffect(() => {
     try {
       const stored = localStorage.getItem("voice_assistant_transcript");
       if (stored) {
         setMessages(JSON.parse(stored));
-      } else {
-        setMessages(defaultMessages);
-        localStorage.setItem("voice_assistant_transcript", JSON.stringify(defaultMessages));
       }
     } catch (err) {
-      setMessages(defaultMessages);
+      console.error("Failed to load transcript history:", err);
     }
   }, []);
 
@@ -199,9 +166,22 @@ export default function VoiceTranscriptPage() {
 
           {/* Empty log handler */}
           {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-64 text-center">
-              <span className="material-symbols-outlined text-white/20 text-5xl mb-3">notes</span>
-              <p className="text-white/40 text-sm">No audio transcript records available.</p>
+            <div className="flex flex-col items-center justify-center py-20 text-center max-w-md mx-auto z-20 relative">
+              <div className="w-20 h-20 rounded-full bg-[#c6bfff]/10 flex items-center justify-center mb-6 border border-[#c6bfff]/20 animate-pulse">
+                <span className="material-symbols-outlined text-[#c6bfff] text-4xl font-fill" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  graphic_eq
+                </span>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">No Voice Transcript Available</h3>
+              <p className="text-sm text-[#c9c5d0]/80 mb-8 leading-relaxed">
+                Connect and start speaking to the Voice Assistant to ask questions or translate documents. The transcript log will update automatically in real-time.
+              </p>
+              <button 
+                onClick={() => navigate("/voice-assistant")}
+                className="px-6 py-3 rounded-full bg-gradient-to-tr from-[#e4dfff] to-[#6dfad2] text-[#160066] font-bold text-sm tracking-wide uppercase shadow-lg hover:scale-105 active:scale-95 transition-all"
+              >
+                Launch Voice Assistant
+              </button>
             </div>
           )}
 
