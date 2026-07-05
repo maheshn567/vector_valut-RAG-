@@ -1,12 +1,21 @@
-from fastapi import FastAPI,APIRouter,UploadFile,File
+from fastapi import APIRouter, UploadFile, File, Request
+from typing import Optional
 from app.providers.llm.voice_chat_lms.whisper_large_v3_turbo import transcribe
 from app.models.requests import VoiceChatRequest
-from app.models.response import VoiceChatResponse
 
 router = APIRouter()
 
 
 @router.post("/transcribe")
-async def transcribe_api(file: UploadFile = File(...)):
-    request = VoiceChatRequest(audio=file)
-    return await transcribe(request)
+async def transcribe_api(request: Request, file: Optional[UploadFile] = File(None)):
+    text = None
+    content_type = request.headers.get("content-type", "")
+    if "application/json" in content_type:
+        try:
+            body = await request.json()
+            text = body.get("query") or body.get("text") or body.get("message")
+        except Exception:
+            pass
+
+    request_obj = VoiceChatRequest(audio=file, query=text)
+    return await transcribe(request_obj)
