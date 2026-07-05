@@ -10,7 +10,14 @@ const Voice_Assistant_Validation = z.object({
     invalid_type_error: "text must be a string"
   }).optional(),
   transcribe: z.boolean().optional(),
-  translation: z.boolean().optional()
+  translation: z.boolean().optional(),
+  
+  // Optional RAG context parameters
+  appId: z.string().uuid().optional(),
+  groupId: z.string().uuid().optional(),
+  docId: z.string().uuid().optional(),
+  topK: z.number().optional(),
+  conversationId: z.string().uuid().optional()
 }).refine(data => data.audio || data.text, {
   message: "Either audio or text is required",
   path: ["audio", "text"]
