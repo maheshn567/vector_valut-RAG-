@@ -8,6 +8,7 @@ import ragrouter from "./src/routes/rag-upload.route.js";
 import llmResponseRouter from "./src/routes/llmresponse.route.js";
 import conversationRouter from "./src/routes/conversation.route.js";
 import googleSignin from './src/routes/googleAuth.route.js'
+import voiceAssistRouter from "./src/routes/voiceassist.route.js";
 const app = express();
 
 app.use(cors({
@@ -24,6 +25,7 @@ app.use('/api/v1/rag', ragrouter);
 app.use('/api/v1/query', llmResponseRouter);
 app.use('/api/v1/conversations', conversationRouter);
 app.use('/api/v1/auth',googleSignin)
+app.use('/api/v1/voice-assist', voiceAssistRouter);
 
 app.get("/health", (req, res) => {
   res.status(200).json({ message: "OK" });

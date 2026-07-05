@@ -1,4 +1,3 @@
-import prisma from '../../../prisma/index.js';
 import Voice_Assistant_Validation from '../validation/voice-assistant.validation.js';
 import process_voice from '../utility/voice_assisant.js';
 
