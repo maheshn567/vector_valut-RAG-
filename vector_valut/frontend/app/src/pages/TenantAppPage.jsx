@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../Hooks/useAuthHook";
 import { getTenantApps, createApp, updateApp } from "../apis/app.api";
 import TenAntApp from "../components/AppInfoComp";
@@ -37,13 +37,20 @@ export default function TenantAppPage() {
     }
   };
 
+  const location = useLocation();
+
   useEffect(() => {
     if (!authLoading && !tenant) {
       navigate("/signin");
     } else if (tenant) {
       fetchApps();
+
+      if (location.state?.openCreate) {
+        handleOpenCreateModal();
+        window.history.replaceState({}, document.title);
+      }
     }
-  }, [tenant, authLoading, navigate]);
+  }, [tenant, authLoading, navigate, location]);
 
   // Handle active/inactive status toggle
   const handleToggleStatus = async (appId, checked) => {

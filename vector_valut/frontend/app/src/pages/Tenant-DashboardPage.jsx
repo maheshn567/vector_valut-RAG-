@@ -192,7 +192,7 @@ export default function TenantDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 
                 <button 
-                  onClick={() => navigate("/apps/create")}
+                  onClick={() => navigate("/apps", { state: { openCreate: true } })}
                   className="bg-[#11141c]/40 backdrop-blur-xl border border-white/5 px-6 py-4 rounded-xl flex items-center gap-4 hover:bg-[#1c2b3c] transition-all cursor-pointer group text-left"
                 >
                   <div className="w-10 h-10 rounded bg-[#6c5ce7]/10 flex items-center justify-center text-[#6c5ce7] group-hover:bg-[#6c5ce7] group-hover:text-white transition-all">
@@ -205,7 +205,7 @@ export default function TenantDashboard() {
                 </button>
 
                 <button 
-                  onClick={() => navigate("/documents/upload")}
+                  onClick={() => navigate("/documents")}
                   className="bg-[#11141c]/40 backdrop-blur-xl border border-white/5 px-6 py-4 rounded-xl flex items-center gap-4 hover:bg-[#1c2b3c] transition-all cursor-pointer group text-left"
                 >
                   <div className="w-10 h-10 rounded bg-[#4bddb7]/10 flex items-center justify-center text-[#4bddb7] group-hover:bg-[#4bddb7] group-hover:text-black transition-all">
@@ -217,8 +217,8 @@ export default function TenantDashboard() {
                   </div>
                 </button>
 
-                <a 
-                  href="#api-docs"
+                <button 
+                  onClick={() => navigate("/pipeline")}
                   className="bg-[#11141c]/40 backdrop-blur-xl border border-white/5 px-6 py-4 rounded-xl flex items-center gap-4 hover:bg-[#1c2b3c] transition-all cursor-pointer group text-left"
                 >
                   <div className="w-10 h-10 rounded bg-[#ffb77d]/10 flex items-center justify-center text-[#ffb77d] group-hover:bg-[#ffb77d] group-hover:text-black transition-all">
@@ -228,7 +228,7 @@ export default function TenantDashboard() {
                     <p className="font-['Hanken_Grotesk'] text-sm font-bold text-white">View API Docs</p>
                     <p className="text-xs text-[#c8c4d7]/60">Integration guidelines</p>
                   </div>
-                </a>
+                </button>
 
               </div>
             </section>
