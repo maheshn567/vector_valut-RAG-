@@ -69,6 +69,7 @@ export default function VoiceAssisantPage() {
   const recordingTimeoutRef = useRef(null);
   const vadRef = useRef(null);
   const streamRef = useRef(null);
+  const pendingChunksRef = useRef(0);
 
   // Stale closure guard: track latest streaming options in ref
   const sessionOptionsRef = useRef({});
@@ -250,11 +251,31 @@ export default function VoiceAssisantPage() {
       const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
       mediaRecorderRef.current = mediaRecorder;
 
+      pendingChunksRef.current = 0;
+
       mediaRecorder.ondataavailable = async (event) => {
         if (event.data && event.data.size > 0) {
-          const arrayBuffer = await event.data.arrayBuffer();
-          sendAudioChunk(arrayBuffer);
+          pendingChunksRef.current++;
+          try {
+            const arrayBuffer = await event.data.arrayBuffer();
+            sendAudioChunk(arrayBuffer);
+          } catch (e) {
+            console.error("Error processing audio chunk:", e);
+          } finally {
+            pendingChunksRef.current--;
+          }
         }
+      };
+
+      mediaRecorder.onstop = () => {
+        const checkAndEnd = () => {
+          if (pendingChunksRef.current === 0) {
+            endVoiceStream();
+          } else {
+            setTimeout(checkAndEnd, 50);
+          }
+        };
+        checkAndEnd();
       };
 
       mediaRecorder.start(250);
@@ -269,7 +290,6 @@ export default function VoiceAssisantPage() {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
       mediaRecorderRef.current.stop();
     }
-    endVoiceStream();
     setStatus("processing");
   };
 
