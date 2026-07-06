@@ -348,16 +348,36 @@ export default function TenantDashboard() {
                   <h3 className="font-['Hanken_Grotesk'] text-lg font-bold text-white mb-6">Recent Activity</h3>
                   <div className="space-y-6">
                     
-                    <div className="flex gap-4 items-start">
-                      <div className="w-8 h-8 rounded-full bg-[#4bddb7]/10 flex items-center justify-center shrink-0">
-                        <span className="material-symbols-outlined text-[#4bddb7] text-sm">upload</span>
+                    {documents.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-6 text-center text-xs text-[#c8c4d7]/40 font-mono">
+                        <span className="material-symbols-outlined text-3xl mb-2 text-[#c8c4d7]/20">description</span>
+                        <p>NO DOCUMENTS INGESTED</p>
+                        <Link to="/documents" className="text-[#6c5ce7] hover:underline mt-1 font-sans font-bold">
+                          Upload First File
+                        </Link>
                       </div>
-                      <div className="space-y-0.5">
-                        <p className="text-sm font-bold text-white">Document Ingested</p>
-                        <p className="text-xs text-[#c8c4d7]/70">"knowledge_base_2026.pdf"</p>
-                        <p className="text-[10px] text-[#c8c4d7]/30 font-mono">10 mins ago</p>
-                      </div>
-                    </div>
+                    ) : (
+                      [...documents]
+                        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                        .slice(0, 2)
+                        .map((doc) => {
+                          const timeStr = new Date(doc.createdAt).toLocaleDateString();
+                          return (
+                            <div key={doc.docId} className="flex gap-4 items-start">
+                              <div className="w-8 h-8 rounded-full bg-[#4bddb7]/10 flex items-center justify-center shrink-0">
+                                <span className="material-symbols-outlined text-[#4bddb7] text-sm">upload</span>
+                              </div>
+                              <div className="space-y-0.5">
+                                <p className="text-sm font-bold text-white">Document Ingested</p>
+                                <p className="text-xs text-[#c8c4d7]/70 truncate max-w-[200px]" title={doc.docName}>
+                                  "{doc.docName}"
+                                </p>
+                                <p className="text-[10px] text-[#c8c4d7]/30 font-mono">{timeStr}</p>
+                              </div>
+                            </div>
+                          );
+                        })
+                    )}
 
                     <div className="flex gap-4 items-start">
                       <div className="w-8 h-8 rounded-full bg-[#6c5ce7]/10 flex items-center justify-center shrink-0">
@@ -366,7 +386,7 @@ export default function TenantDashboard() {
                       <div className="space-y-0.5">
                         <p className="text-sm font-bold text-white">RAG Quota Check</p>
                         <p className="text-xs text-[#c8c4d7]/70">Vector engine reports healthy sync</p>
-                        <p className="text-[10px] text-[#c8c4d7]/30 font-mono">45 mins ago</p>
+                        <p className="text-[10px] text-[#c8c4d7]/30 font-mono">Active</p>
                       </div>
                     </div>
 
@@ -377,10 +397,9 @@ export default function TenantDashboard() {
                       <div className="space-y-0.5">
                         <p className="text-sm font-bold text-white">Credentials Check</p>
                         <p className="text-xs text-[#c8c4d7]/70">OAuth validation verified</p>
-                        <p className="text-[10px] text-[#c8c4d7]/30 font-mono">2 hours ago</p>
+                        <p className="text-[10px] text-[#c8c4d7]/30 font-mono">Active</p>
                       </div>
                     </div>
-
                   </div>
                 </div>
 
