@@ -86,6 +86,16 @@ export default function VoiceAssisantPage() {
     };
   }, [selectedApp, selectedDoc, activeConversationId, mode, tenantId]);
 
+  const selectedDocRef = useRef(selectedDoc);
+  useEffect(() => {
+    selectedDocRef.current = selectedDoc;
+  }, [selectedDoc]);
+
+  const isSpeakerEnabledRef = useRef(isSpeakerEnabled);
+  useEffect(() => {
+    isSpeakerEnabledRef.current = isSpeakerEnabled;
+  }, [isSpeakerEnabled]);
+
   // Session duration timer states
   const [sessionTime, setSessionTime] = useState("00:00");
   const sessionStartRef = useRef(Date.now());
@@ -150,7 +160,7 @@ export default function VoiceAssisantPage() {
 
   // Audio Playback Handler
   const playAudioResponse = (base64Audio) => {
-    if (!isSpeakerEnabled) {
+    if (!isSpeakerEnabledRef.current) {
       startListeningSession();
       return;
     }
@@ -302,10 +312,10 @@ export default function VoiceAssisantPage() {
         if (conversationId) {
           setActiveConversationId(conversationId);
         }
-
+ 
         setTranscriptionText("Voice prompt processed successfully.");
         setAiResponseText(answer || "I've processed your request.");
-
+ 
         const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
         const userMsg = {
           id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(),
@@ -318,15 +328,15 @@ export default function VoiceAssisantPage() {
           role: "assistant",
           text: answer,
           time: timeStr,
-          citations: selectedDoc ? [{ docName: selectedDoc.docName }] : []
+          citations: selectedDocRef.current ? [{ docName: selectedDocRef.current.docName }] : []
         };
-
+ 
         setMessages((prev) => {
           const updated = [...prev, userMsg, assistantMsg];
           localStorage.setItem("voice_assistant_transcript", JSON.stringify(updated));
           return updated;
         });
-
+ 
         if (audio) {
           playAudioResponse(audio);
         } else {
@@ -334,17 +344,17 @@ export default function VoiceAssisantPage() {
         }
       }
     });
-
+ 
     onSocketError((err) => {
       console.error("Socket error during voice stream:", err);
       toast.error(err.message || "Voice processing failed. Please try again.");
       startListeningSession();
     });
-
+ 
     return () => {
       disconnectSocket();
     };
-  }, [selectedDoc, activeConversationId, mode]);
+  }, []);
 
   // Start listening session once apps are loaded
   useEffect(() => {
