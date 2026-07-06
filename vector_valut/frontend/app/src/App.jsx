@@ -12,6 +12,7 @@ import SettingsPage from "./pages/SettingsPage"
 import PricingPage from "./pages/Pricing_page"
 import ChangelogPage from "./pages/Chaneleog"
 import PipeLinePage from "./pages/PipeLinePage"
+import FeaturesPage from "./pages/FeaturesPage"
 import { Route, Routes, useLocation } from "react-router-dom"
 
 export default function App() {
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/changelog" element={<ChangelogPage />} />
           <Route path="/pipeline" element={<PipeLinePage />} />
+          <Route path="/features" element={<FeaturesPage />} />
           <Route path="/voice-assistant" element={<VoiceAssisantPage />} />
         </Routes>
       </main>
