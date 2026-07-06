@@ -251,9 +251,8 @@ export default function CorporaPage() {
               Vector <span className="text-[#6c5ce7]">Vault</span>
             </span>
             <nav className="hidden md:flex items-center gap-6">
-              <a className="text-[#c8c4d7] hover:text-[#6c5ce7] transition-colors font-['JetBrains_Mono'] text-[10px] uppercase tracking-wider" href="#docs">Docs</a>
-              <a className="text-[#c8c4d7] hover:text-[#6c5ce7] transition-colors font-['JetBrains_Mono'] text-[10px] uppercase tracking-wider" href="#pricing">Pricing</a>
-              <a className="text-[#c8c4d7] hover:text-[#6c5ce7] transition-colors font-['JetBrains_Mono'] text-[10px] uppercase tracking-wider" href="#changelog">Changelog</a>
+              <Link className="text-[#c8c4d7] hover:text-[#6c5ce7] transition-colors font-['JetBrains_Mono'] text-[10px] uppercase tracking-wider" to="/pricing">Pricing</Link>
+              <Link className="text-[#c8c4d7] hover:text-[#6c5ce7] transition-colors font-['JetBrains_Mono'] text-[10px] uppercase tracking-wider" to="/changelog">Changelog</Link>
             </nav>
           </div>
           
