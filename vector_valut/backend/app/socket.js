@@ -2,8 +2,8 @@ import process_voice from "./src/utility/voice_assisant.js";
 import { generateAnswer } from "./src/controllers/generate.controller.js";
 
 export default function socketHandler(io) {
-  io.on("connection", (socket) => {
-    console.log("WebSocket client connected:", socket.id);
+  io.of("/voice").on("connection", (socket) => {
+    console.log("Voice WebSocket client connected:", socket.id);
 
     // Initial state tracking
     socket.voiceSession = {
