@@ -80,8 +80,8 @@ export default function VoiceAssistSpeakController({
             Speaking...
           </p>
 
-          <div className="p-6 glass-panel rounded-2xl border border-white/10 text-left shadow-2xl relative">
-            <h2 className="text-base text-white font-medium leading-relaxed">
+          <div className="p-5 glass-panel rounded-2xl border border-white/10 text-left shadow-2xl relative max-h-36 md:max-h-48 overflow-y-auto scrollbar-none">
+            <h2 className="text-sm md:text-base text-white font-medium leading-relaxed">
               {aiResponseText}
             </h2>
             
@@ -101,7 +101,7 @@ export default function VoiceAssistSpeakController({
       </main>
 
       {/* Symmetrical Bottom Control Bar */}
-      <nav className="fixed bottom-0 left-0 w-full px-6 md:px-10 py-8 z-50 flex flex-col items-center gap-6">
+      <nav className="w-full px-6 md:px-10 mt-6 flex flex-col items-center gap-4 z-30 relative pb-2">
         
         {/* Interrupt Session Trigger */}
         <button 
