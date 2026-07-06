@@ -70,6 +70,21 @@ export default function VoiceAssisantPage() {
   const vadRef = useRef(null);
   const streamRef = useRef(null);
 
+  // Stale closure guard: track latest streaming options in ref
+  const sessionOptionsRef = useRef({});
+  useEffect(() => {
+    sessionOptionsRef.current = {
+      appId: selectedApp?.appId,
+      docId: selectedDoc?.docId,
+      topK: 5,
+      conversationId: activeConversationId || undefined,
+      transcribe: mode === "transcribe",
+      translation: mode === "translate",
+      tenantId,
+      userId: tenantId,
+    };
+  }, [selectedApp, selectedDoc, activeConversationId, mode, tenantId]);
+
   // Session duration timer states
   const [sessionTime, setSessionTime] = useState("00:00");
   const sessionStartRef = useRef(Date.now());
@@ -230,16 +245,7 @@ export default function VoiceAssisantPage() {
     }
 
     try {
-      startVoiceStream({
-        appId: selectedApp?.appId,
-        docId: selectedDoc?.docId,
-        topK: 5,
-        conversationId: activeConversationId || undefined,
-        transcribe: mode === "transcribe",
-        translation: mode === "translate",
-        tenantId,
-        userId: tenantId,
-      });
+      startVoiceStream(sessionOptionsRef.current);
 
       const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
       mediaRecorderRef.current = mediaRecorder;
