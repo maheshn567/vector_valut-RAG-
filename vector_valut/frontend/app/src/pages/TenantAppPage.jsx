@@ -20,6 +20,12 @@ export default function TenantAppPage() {
   const [formAppType, setFormAppType] = useState("Support Bot");
   const [submitting, setSubmitting] = useState(false);
 
+  // appDbConfig attributes
+  const [dbProvider, setDbProvider] = useState("pgvector");
+  const [modelProvider, setModelProvider] = useState("openai");
+  const [modelName, setModelName] = useState("gpt-4o");
+  const [temperature, setTemperature] = useState(0.7);
+
   // Fetch all applications
   const fetchApps = async () => {
     try {
@@ -74,6 +80,13 @@ export default function TenantAppPage() {
     setFormAppName("");
     setFormDescription("");
     setFormAppType("Support Bot");
+    
+    // Reset config states
+    setDbProvider("pgvector");
+    setModelProvider("openai");
+    setModelName("gpt-4o");
+    setTemperature(0.7);
+    
     setShowModal(true);
   };
 
@@ -83,6 +96,14 @@ export default function TenantAppPage() {
     setFormAppName(appItem.appName || "");
     setFormDescription(appItem.appDescription || "");
     setFormAppType(appItem.appType || "Support Bot");
+
+    // Populate existing config or default
+    const config = appItem.appDbConfig || {};
+    setDbProvider(config.dbProvider || "pgvector");
+    setModelProvider(config.modelProvider || "openai");
+    setModelName(config.modelName || "gpt-4o");
+    setTemperature(config.temperature !== undefined ? config.temperature : 0.7);
+
     setShowModal(true);
   };
 
@@ -105,12 +126,20 @@ export default function TenantAppPage() {
 
     setSubmitting(true);
     try {
+      const configData = {
+        dbProvider,
+        modelProvider,
+        modelName,
+        temperature: parseFloat(temperature),
+      };
+
       if (editAppId) {
         // Edit mode API PATCH call
         const response = await updateApp(editAppId, {
           appName: formAppName,
           appDescription: formDescription,
           appType: formAppType,
+          appDbConfig: configData,
         });
 
         if (response && response.success) {
@@ -126,6 +155,7 @@ export default function TenantAppPage() {
           appName: formAppName,
           appDescription: formDescription,
           appType: formAppType,
+          appDbConfig: configData,
         });
 
         if (response && response.success) {
@@ -347,6 +377,89 @@ export default function TenantAppPage() {
                   <option value="Internal Wiki">Internal Wiki</option>
                   <option value="API Endpoint Only">API Endpoint Only</option>
                 </select>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-white/5 my-6 pt-4">
+                <h4 className="font-['JetBrains_Mono'] text-[10px] text-[#6c5ce7] uppercase tracking-wider font-bold mb-4">
+                  Database & LLM Settings (appDbConfig)
+                </h4>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Database Provider */}
+                  <div className="space-y-1">
+                    <label className="font-['JetBrains_Mono'] text-[9px] text-[#c8c4d7]/50 uppercase tracking-wider block font-semibold">
+                      Vector Database
+                    </label>
+                    <select 
+                      value={dbProvider}
+                      onChange={(e) => setDbProvider(e.target.value)}
+                      className="w-full h-10 bg-[#122131] border border-white/10 rounded-lg px-3 text-xs text-white focus:outline-none focus:border-[#6c5ce7] focus:ring-1 focus:ring-[#6c5ce7] transition-all"
+                    >
+                      <option value="pgvector">pgvector (default)</option>
+                      <option value="pinecone">pinecone</option>
+                      <option value="milvus">milvus</option>
+                    </select>
+                  </div>
+
+                  {/* LLM Provider */}
+                  <div className="space-y-1">
+                    <label className="font-['JetBrains_Mono'] text-[9px] text-[#c8c4d7]/50 uppercase tracking-wider block font-semibold">
+                      LLM Provider
+                    </label>
+                    <select 
+                      value={modelProvider}
+                      onChange={(e) => {
+                        const prov = e.target.value;
+                        setModelProvider(prov);
+                        if (prov === "openai") setModelName("gpt-4o");
+                        else if (prov === "gemini") setModelName("gemini-1.5-pro");
+                        else if (prov === "anthropic") setModelName("claude-3-5-sonnet");
+                        else if (prov === "ollama") setModelName("llama3");
+                      }}
+                      className="w-full h-10 bg-[#122131] border border-white/10 rounded-lg px-3 text-xs text-white focus:outline-none focus:border-[#6c5ce7] focus:ring-1 focus:ring-[#6c5ce7] transition-all"
+                    >
+                      <option value="openai">OpenAI</option>
+                      <option value="gemini">Google Gemini</option>
+                      <option value="anthropic">Anthropic Claude</option>
+                      <option value="ollama">Ollama (Local)</option>
+                    </select>
+                  </div>
+
+                  {/* Model Name */}
+                  <div className="space-y-1">
+                    <label className="font-['JetBrains_Mono'] text-[9px] text-[#c8c4d7]/50 uppercase tracking-wider block font-semibold">
+                      Model Name
+                    </label>
+                    <input 
+                      type="text"
+                      required
+                      placeholder="e.g. gpt-4o"
+                      value={modelName}
+                      onChange={(e) => setModelName(e.target.value)}
+                      className="w-full h-10 bg-white/5 border border-white/10 rounded-lg px-3 text-xs text-white focus:outline-none focus:border-[#6c5ce7] focus:ring-1 focus:ring-[#6c5ce7] transition-all font-sans"
+                    />
+                  </div>
+
+                  {/* Temperature */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-center pr-1">
+                      <label className="font-['JetBrains_Mono'] text-[9px] text-[#c8c4d7]/50 uppercase tracking-wider block font-semibold">
+                        Temperature
+                      </label>
+                      <span className="font-mono text-[10px] text-[#c6bfff]">{temperature}</span>
+                    </div>
+                    <input 
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={temperature}
+                      onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                      className="w-full h-10 accent-[#6c5ce7] cursor-pointer"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* CTA Actions */}

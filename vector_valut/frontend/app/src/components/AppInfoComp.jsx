@@ -58,6 +58,19 @@ export default function TenAntApp({ tenantApp, onToggleStatus, onEdit, onDelete 
         {tenantApp.appDescription || "No description provided."}
       </p>
 
+      {tenantApp.appDbConfig && typeof tenantApp.appDbConfig === 'object' && (
+        <div className="flex flex-wrap gap-1.5 pt-4 border-t border-white/5 font-mono text-[9px] text-[#c8c4d7]/50">
+          <span className="bg-[#122131] px-2 py-0.5 rounded border border-white/5 uppercase">
+            {tenantApp.appDbConfig.dbProvider || "pgvector"}
+          </span>
+          <span className="bg-[#122131] px-2 py-0.5 rounded border border-[#6c5ce7]/10 text-[#c6bfff] uppercase">
+            {tenantApp.appDbConfig.modelProvider || "openai"}: {tenantApp.appDbConfig.modelName || "gpt-4o"}
+          </span>
+          <span className="bg-[#122131] px-2 py-0.5 rounded border border-white/5">
+            temp: {tenantApp.appDbConfig.temperature !== undefined ? tenantApp.appDbConfig.temperature : 0.7}
+          </span>
+        </div>
+      )}
 
     </article>
   );
