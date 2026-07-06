@@ -70,6 +70,8 @@ export default function VoiceAssisantPage() {
   const vadRef = useRef(null);
   const streamRef = useRef(null);
   const pendingChunksRef = useRef(0);
+  const chunkQueueRef = useRef([]);
+  const processingQueueRef = useRef(false);
 
   // Stale closure guard: track latest streaming options in ref
   const sessionOptionsRef = useRef({});
@@ -262,18 +264,33 @@ export default function VoiceAssisantPage() {
       mediaRecorderRef.current = mediaRecorder;
 
       pendingChunksRef.current = 0;
+      chunkQueueRef.current = [];
+      processingQueueRef.current = false;
 
-      mediaRecorder.ondataavailable = async (event) => {
-        if (event.data && event.data.size > 0) {
+      const processQueue = async () => {
+        if (processingQueueRef.current || chunkQueueRef.current.length === 0) return;
+        processingQueueRef.current = true;
+
+        while (chunkQueueRef.current.length > 0) {
+          const blob = chunkQueueRef.current.shift();
           pendingChunksRef.current++;
           try {
-            const arrayBuffer = await event.data.arrayBuffer();
+            const arrayBuffer = await blob.arrayBuffer();
             sendAudioChunk(arrayBuffer);
           } catch (e) {
             console.error("Error processing audio chunk:", e);
           } finally {
             pendingChunksRef.current--;
           }
+        }
+
+        processingQueueRef.current = false;
+      };
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          chunkQueueRef.current.push(event.data);
+          processQueue();
         }
       };
 
