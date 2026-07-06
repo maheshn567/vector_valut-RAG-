@@ -19,7 +19,7 @@ export default function VoiceListenNav({
 }) {
   if (panelMode === "live-transcript") {
     return (
-      <header className="flex justify-between items-center py-4 h-16 w-full fixed top-0 left-0 px-6 md:px-16 z-30 bg-[#051424]/80 backdrop-blur-md border-b border-white/5">
+      <header className="flex justify-between items-center py-4 h-16 w-full px-6 md:px-16 z-30 bg-[#051424]/80 backdrop-blur-md border-b border-white/5">
         <div className="flex items-center gap-4">
           {/* Compact 40px pulsing orb button */}
           <button 

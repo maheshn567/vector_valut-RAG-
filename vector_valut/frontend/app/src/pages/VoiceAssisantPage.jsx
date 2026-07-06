@@ -484,7 +484,7 @@ export default function VoiceAssisantPage() {
       {/* 4. Slide-up live-transcript Sheet Tray */}
       <div 
         className={`fixed inset-x-0 bottom-0 bg-[#051424]/95 backdrop-blur-xl border-t border-white/10 z-40 transition-all duration-500 ease-out flex flex-col ${
-          panelMode === "live-transcript" ? "h-[72vh] opacity-100 translate-y-0" : "h-0 opacity-0 translate-y-full pointer-events-none"
+          panelMode === "live-transcript" ? "h-[calc(100vh-4rem)] opacity-100 translate-y-0" : "h-0 opacity-0 translate-y-full pointer-events-none"
         }`}
       >
         <div className="flex-grow flex flex-col h-full overflow-hidden relative">
