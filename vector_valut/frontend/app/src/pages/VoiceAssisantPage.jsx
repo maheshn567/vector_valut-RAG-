@@ -380,7 +380,7 @@ export default function VoiceAssisantPage() {
       <div className="fixed inset-0 z-10 flex flex-col justify-between items-center py-6 px-4 md:py-8 md:px-10 bg-gradient-to-b from-[#051424]/40 via-transparent to-[#051424]/80">
         
         {/* Render Listening/Speaking Nav Headers when active */}
-        {panelMode !== "ended-transcript" && (
+        {panelMode === "voice-active" && (
           status !== "speaking" ? (
             <VoiceListenNav
               selectedApp={selectedApp}
@@ -488,6 +488,45 @@ export default function VoiceAssisantPage() {
         }`}
       >
         <div className="flex-grow flex flex-col h-full overflow-hidden relative">
+          {/* Header Nav rendered inside the tray for absolute layout safety */}
+          {status !== "speaking" ? (
+            <VoiceListenNav
+              selectedApp={selectedApp}
+              apps={apps}
+              setSelectedApp={setSelectedApp}
+              showAppDropdown={showAppDropdown}
+              setShowAppDropdown={setShowAppDropdown}
+              selectedDoc={selectedDoc}
+              documents={documents}
+              setSelectedDoc={setSelectedDoc}
+              showDocDropdown={showDocDropdown}
+              setShowDocDropdown={setShowDocDropdown}
+              mode={mode}
+              setMode={setMode}
+              onClose={handleEndCall}
+              panelMode={panelMode}
+              onToggleExpand={() => setPanelMode("voice-active")}
+            />
+          ) : (
+            <VoiceSpeakNav
+              selectedApp={selectedApp}
+              apps={apps}
+              setSelectedApp={setSelectedApp}
+              showAppDropdown={showAppDropdown}
+              setShowAppDropdown={setShowAppDropdown}
+              selectedDoc={selectedDoc}
+              documents={documents}
+              setSelectedDoc={setSelectedDoc}
+              showDocDropdown={showDocDropdown}
+              setShowDocDropdown={setShowDocDropdown}
+              mode={mode}
+              setMode={setMode}
+              onClose={handleEndCall}
+              panelMode={panelMode}
+              onToggleExpand={() => setPanelMode("voice-active")}
+            />
+          )}
+
           <VoiceAssistTranscriptInterface 
             messages={messages} 
             navigate={navigate} 

@@ -11,9 +11,7 @@ export default function VoiceAssistTranscriptInterface({ messages, navigate, isT
   }, [messages]);
 
   return (
-    <main className={`flex-1 w-full overflow-y-auto px-4 md:px-10 space-y-6 scroll-smooth select-text z-20 relative ${
-      isTray ? "pt-6 pb-2" : "pt-24 pb-28"
-    }`}>
+    <main className="flex-1 w-full overflow-y-auto px-4 md:px-10 py-6 space-y-6 scroll-smooth select-text z-20 relative">
       {messages.map((msg) => (
         <div 
           key={msg.id}

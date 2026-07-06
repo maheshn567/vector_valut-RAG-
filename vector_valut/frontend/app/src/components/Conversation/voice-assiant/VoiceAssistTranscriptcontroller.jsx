@@ -8,9 +8,8 @@ export default function VoiceAssitTranscriptController({
   onShare
 }) {
   return (
-    <footer className="fixed bottom-0 left-0 w-full z-40 bg-gradient-to-t from-[#051424] via-[#051424]/90 to-transparent">
-      <div className="bg-[#010f1f]/90 backdrop-blur-xl border-t border-white/5 px-6 md:px-16 py-5">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
+    <footer className="w-full z-40 bg-[#010f1f]/95 border-t border-white/5 px-6 md:px-16 py-4">
+      <div className="max-w-5xl mx-auto flex items-center justify-between">
           
           {/* Left info pill */}
           <div className="hidden md:flex flex-col select-none">
@@ -68,7 +67,6 @@ export default function VoiceAssitTranscriptController({
           </div>
 
         </div>
-      </div>
     </footer>
   );
 }

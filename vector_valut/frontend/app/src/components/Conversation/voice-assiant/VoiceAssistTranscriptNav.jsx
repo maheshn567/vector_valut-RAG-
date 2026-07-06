@@ -2,7 +2,7 @@ import React from "react";
 
 export default function VoiceAssistTranscriptNav({ sessionTime, onClose }) {
   return (
-    <header className="flex justify-between items-center py-6 h-16 w-full fixed top-0 left-0 px-6 md:px-16 z-30 bg-gradient-to-b from-[#051424]/80 to-transparent backdrop-blur-sm">
+    <header className="flex justify-between items-center py-4 h-16 w-full px-6 md:px-16 z-30 bg-[#051424]/80 backdrop-blur-md border-b border-white/5">
       <div className="flex items-center gap-4">
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6dfad2] to-[#c6bfff] animate-pulse orb-glow"></div>
         <div className="flex flex-col">
