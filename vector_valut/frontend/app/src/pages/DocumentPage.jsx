@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../Hooks/useAuthHook";
 import { getTenantApps } from "../apis/app.api";
 import { getAppGroups } from "../apis/group.api";
@@ -166,7 +166,7 @@ export default function DocumentsPage() {
               Vector <span className="text-[#6c5ce7]">Vault</span>
             </span>
             <nav className="hidden md:flex items-center gap-6">
-              <a className="text-[#c8c4d7] hover:text-[#6c5ce7] transition-colors font-['JetBrains_Mono'] text-[10px] uppercase tracking-wider" href="#pricing">Pricing</a>
+              <Link className="text-[#c8c4d7] hover:text-[#6c5ce7] transition-colors font-['JetBrains_Mono'] text-[10px] uppercase tracking-wider" to="/pricing">Pricing</Link>
               <a className="text-[#c8c4d7] hover:text-[#6c5ce7] transition-colors font-['JetBrains_Mono'] text-[10px] uppercase tracking-wider" href="#changelog">Changelog</a>
             </nav>
           </div>
