@@ -69,11 +69,6 @@ export default function SideBar({ onCtaClick, ctaText }) {
           <span className="font-['JetBrains_Mono'] text-[11px] uppercase tracking-wider">Conversations</span>
         </Link>
 
-        <Link to="/keys" className={getLinkClass("/keys")}>
-          <span className="material-symbols-outlined text-base">vpn_key</span>
-          <span className="font-['JetBrains_Mono'] text-[11px] uppercase tracking-wider">API Keys</span>
-        </Link>
-
         <Link to="/settings" className={getLinkClass("/settings")}>
           <span className="material-symbols-outlined text-base">settings</span>
           <span className="font-['JetBrains_Mono'] text-[11px] uppercase tracking-wider">Settings</span>

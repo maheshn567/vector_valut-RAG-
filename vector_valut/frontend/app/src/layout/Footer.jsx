@@ -80,11 +80,7 @@ export default function Footer() {
                   Discord
                 </Link>
               </li>
-              <li>
-                <Link to="/apikeys" className="text-[#d4e4fa]/70 hover:text-white transition-colors">
-                  API Keys
-                </Link>
-              </li>
+
             </ul>
           </div>
 
