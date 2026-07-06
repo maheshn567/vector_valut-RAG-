@@ -16,12 +16,12 @@ export default function VoiceAssistSpeakController({
         {/* Central Orb Container */}
         <div className="relative group">
           {/* Radial Glow Background */}
-          <div className="absolute inset-0 bg-[#4BDDB7]/20 blur-[60px] rounded-full scale-110 opacity-50 animate-pulse"></div>
+          <div className="absolute inset-0 bg-[#4BDDB7]/20 blur-[50px] rounded-full scale-110 opacity-50 animate-pulse"></div>
           
           {/* Main Animated Orb */}
           <div 
             onClick={onOrbClick}
-            className="relative w-32 h-32 sm:w-44 sm:h-44 md:w-56 md:h-56 flex items-center justify-center cursor-pointer hover:scale-105 transition-all"
+            className="relative w-[22vh] h-[22vh] min-w-[110px] min-h-[110px] max-w-[220px] max-h-[220px] flex items-center justify-center cursor-pointer hover:scale-105 transition-all"
             title="Click to interrupt"
           >
             <svg className="w-full h-full scale-125" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
@@ -60,18 +60,18 @@ export default function VoiceAssistSpeakController({
           </div>
 
           {/* Symmetrical Waveform Overlay */}
-          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex items-end gap-1.5 h-12 z-30 pointer-events-none">
-            <div className="waveform-bar w-1 rounded-full bg-[#4BDDB7]" style={{ animationDelay: "0.1s", height: "12px" }}></div>
-            <div className="waveform-bar w-1 rounded-full bg-[#4BDDB7]" style={{ animationDelay: "0.3s", height: "24px" }}></div>
-            <div className="waveform-bar w-1 rounded-full bg-[#4BDDB7]" style={{ animationDelay: "0.5s", height: "32px" }}></div>
-            <div className="waveform-bar w-1 rounded-full bg-[#4BDDB7]" style={{ animationDelay: "0.2s", height: "20px" }}></div>
-            <div className="waveform-bar w-1 rounded-full bg-[#4BDDB7]" style={{ animationDelay: "0.4s", height: "28px" }}></div>
-            <div className="waveform-bar w-1 rounded-full bg-[#4BDDB7]" style={{ animationDelay: "0.6s", height: "16px" }}></div>
+          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex items-end gap-1.5 h-10 z-30 pointer-events-none">
+            <div className="waveform-bar w-1 rounded-full bg-[#4BDDB7]" style={{ animationDelay: "0.1s", height: "10px" }}></div>
+            <div className="waveform-bar w-1 rounded-full bg-[#4BDDB7]" style={{ animationDelay: "0.3s", height: "20px" }}></div>
+            <div className="waveform-bar w-1 rounded-full bg-[#4BDDB7]" style={{ animationDelay: "0.5s", height: "28px" }}></div>
+            <div className="waveform-bar w-1 rounded-full bg-[#4BDDB7]" style={{ animationDelay: "0.2s", height: "16px" }}></div>
+            <div className="waveform-bar w-1 rounded-full bg-[#4BDDB7]" style={{ animationDelay: "0.4s", height: "24px" }}></div>
+            <div className="waveform-bar w-1 rounded-full bg-[#4BDDB7]" style={{ animationDelay: "0.6s", height: "12px" }}></div>
           </div>
         </div>
 
         {/* AI Status Header & Response Text */}
-        <div className="space-y-4 mt-6 md:mt-10 text-center max-w-xl px-6">
+        <div className="space-y-2 mt-[2vh] text-center w-full max-w-xl px-6">
           <p className="text-xs text-[#4BDDB7] font-semibold uppercase tracking-widest flex items-center justify-center gap-3 select-none">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4BDDB7] opacity-75"></span>
@@ -80,7 +80,7 @@ export default function VoiceAssistSpeakController({
             Speaking...
           </p>
 
-          <div className="p-5 glass-panel rounded-2xl border border-white/10 text-left shadow-2xl relative max-h-36 md:max-h-48 overflow-y-auto scrollbar-none">
+          <div className="p-4 glass-panel rounded-xl border border-white/10 text-left shadow-xl relative max-h-[22vh] min-h-[60px] overflow-y-auto scrollbar-none">
             <h2 className="text-sm md:text-base text-white font-medium leading-relaxed">
               {aiResponseText}
             </h2>
@@ -101,12 +101,12 @@ export default function VoiceAssistSpeakController({
       </main>
 
       {/* Symmetrical Bottom Control Bar */}
-      <nav className="w-full px-6 md:px-10 mt-6 flex flex-col items-center gap-4 z-30 relative pb-2">
+      <nav className="w-full px-6 md:px-10 mt-auto flex flex-col items-center gap-3 z-30 relative pb-1">
         
         {/* Interrupt Session Trigger */}
         <button 
           onClick={onOrbClick}
-          className="bg-[#283647]/80 hover:bg-[#283647] border border-white/10 backdrop-blur-md px-6 py-2.5 rounded-full flex items-center gap-2 group active:scale-95 transition-all duration-200 cursor-pointer"
+          className="bg-[#283647]/80 hover:bg-[#283647] border border-white/10 backdrop-blur-md px-6 py-2 rounded-full flex items-center gap-2 group active:scale-95 transition-all duration-200 cursor-pointer"
         >
           <span className="material-symbols-outlined text-[#ffb4ab] text-[20px]">pan_tool</span>
           <span className="text-xs font-semibold text-white uppercase tracking-wider">Interrupt Session</span>

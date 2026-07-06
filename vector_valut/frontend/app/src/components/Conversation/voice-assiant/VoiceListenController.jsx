@@ -19,10 +19,10 @@ export default function VoiceListenController({
         {/* Animated Central Orb */}
         <div 
           onClick={onOrbClick}
-          className="relative w-44 h-44 sm:w-56 sm:h-56 md:w-72 md:h-72 flex items-center justify-center cursor-pointer transition-all hover:scale-105"
+          className="relative w-[26vh] h-[26vh] min-w-[130px] min-h-[130px] max-w-[260px] max-h-[260px] flex items-center justify-center cursor-pointer transition-all hover:scale-105"
         >
           {/* Atmospheric Glow Background */}
-          <div className={`absolute inset-0 rounded-full blur-[60px] transition-all duration-700 ${
+          <div className={`absolute inset-0 rounded-full blur-[40px] transition-all duration-700 ${
             status === "recording" ? "bg-red-500/25 animate-pulse" :
             status === "processing" ? "bg-[#c6bfff]/15 animate-pulse" : "bg-[#6C5CE7]/20"
           }`}></div>
@@ -63,13 +63,13 @@ export default function VoiceListenController({
         </div>
 
         {/* Status Text Stack */}
-        <div className="text-center mt-6 md:mt-10 space-y-2 px-6 select-none">
-          <h2 className="text-xl md:text-2xl font-bold text-white tracking-wide uppercase">
+        <div className="text-center mt-[2vh] space-y-1 px-6 select-none">
+          <h2 className="text-lg md:text-xl font-bold text-white tracking-wide uppercase">
             {status === "listening" && "Mic is Ready"}
             {status === "recording" && "Listening..."}
             {status === "processing" && "Thinking..."}
           </h2>
-          <p className="text-xs md:text-sm text-[#c9c5d0]/80">
+          <p className="text-[11px] md:text-xs text-[#c9c5d0]/80">
             {status === "listening" && "Click the orb to start speaking"}
             {status === "recording" && "Click again when you finish speaking"}
             {status === "processing" && "Analyzing voice patterns and retrieving context"}
@@ -77,7 +77,7 @@ export default function VoiceListenController({
         </div>
 
         {/* Audio Waveform Visualization */}
-        <div className="mt-8 md:mt-12 h-16 flex items-center justify-center gap-1.5 w-full max-w-lg px-8">
+        <div className="mt-[2vh] h-[7vh] min-h-[25px] flex items-center justify-center gap-1.5 w-full max-w-lg px-8">
           {waveformHeights.map((height, i) => (
             <div 
               key={i}
@@ -86,14 +86,14 @@ export default function VoiceListenController({
                   ? "bg-gradient-to-t from-red-500 to-[#c6bfff]" 
                   : "bg-gradient-to-t from-[#c6bfff] to-[#6dfad2]"
               }`}
-              style={{ height: `${height * 0.7}px` }} // scale down heights slightly
+              style={{ height: `${Math.min(height * 0.5, 45)}px` }} // scale down heights to match vh limits
             ></div>
           ))}
         </div>
       </main>
 
       {/* Footer Controls */}
-      <footer className="w-full grid grid-cols-3 items-center mt-6 md:mt-8">
+      <footer className="w-full grid grid-cols-3 items-center mt-auto pt-2">
         
         {/* Left Toggle buttons */}
         <div className="flex items-center gap-3">
