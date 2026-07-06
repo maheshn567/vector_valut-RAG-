@@ -94,8 +94,12 @@ export default function TenantAppPage() {
   // Form Submit (Handles both creation and updates)
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formAppName.trim()) {
-      toast.error("Application Name is required");
+    if (!formAppName.trim() || formAppName.trim().length < 3) {
+      toast.error("Application Name must be at least 3 characters long");
+      return;
+    }
+    if (!formDescription.trim() || formDescription.trim().length < 10) {
+      toast.error("Description must be at least 10 characters long");
       return;
     }
 
@@ -133,7 +137,7 @@ export default function TenantAppPage() {
         }
       }
     } catch (err) {
-      toast.error(err.message || "Operation failed. Please try again.");
+      toast.error(err.response?.data?.message || err.message || "Operation failed. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -304,11 +308,13 @@ export default function TenantAppPage() {
                 <input 
                   type="text"
                   required
+                  minLength={3}
                   placeholder="e.g. Customer Support Bot"
                   value={formAppName}
                   onChange={(e) => setFormAppName(e.target.value)}
                   className="w-full h-11 bg-white/5 border border-white/10 rounded-lg px-4 text-sm text-white focus:outline-none focus:border-[#6c5ce7] focus:ring-1 focus:ring-[#6c5ce7] transition-all"
                 />
+                <span className="text-[9px] text-[#c8c4d7]/40 block pl-1">Min 3 characters long</span>
               </div>
 
               {/* Description */}
@@ -317,11 +323,14 @@ export default function TenantAppPage() {
                   Description
                 </label>
                 <textarea 
+                  required
+                  minLength={10}
                   placeholder="Describe what this application does..."
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
                   className="w-full h-24 bg-white/5 border border-white/10 rounded-lg p-4 text-sm text-white focus:outline-none focus:border-[#6c5ce7] focus:ring-1 focus:ring-[#6c5ce7] transition-all resize-none"
                 />
+                <span className="text-[9px] text-[#c8c4d7]/40 block pl-1">Min 10 characters long</span>
               </div>
 
               {/* Application Type */}
