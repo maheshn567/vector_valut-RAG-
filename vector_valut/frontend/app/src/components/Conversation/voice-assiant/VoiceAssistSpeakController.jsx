@@ -21,7 +21,7 @@ export default function VoiceAssistSpeakController({
           {/* Main Animated Orb */}
           <div 
             onClick={onOrbClick}
-            className="relative w-48 h-48 md:w-64 md:h-64 flex items-center justify-center cursor-pointer hover:scale-105 transition-all"
+            className="relative w-32 h-32 sm:w-44 sm:h-44 md:w-56 md:h-56 flex items-center justify-center cursor-pointer hover:scale-105 transition-all"
             title="Click to interrupt"
           >
             <svg className="w-full h-full scale-125" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
@@ -71,7 +71,7 @@ export default function VoiceAssistSpeakController({
         </div>
 
         {/* AI Status Header & Response Text */}
-        <div className="space-y-6 mt-12 text-center max-w-xl px-6">
+        <div className="space-y-4 mt-6 md:mt-10 text-center max-w-xl px-6">
           <p className="text-xs text-[#4BDDB7] font-semibold uppercase tracking-widest flex items-center justify-center gap-3 select-none">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4BDDB7] opacity-75"></span>
