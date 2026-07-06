@@ -9,7 +9,20 @@ import llmResponseRouter from "./src/routes/llmresponse.route.js";
 import conversationRouter from "./src/routes/conversation.route.js";
 import googleSignin from './src/routes/googleAuth.route.js'
 import voiceAssistRouter from "./src/routes/voiceassist.route.js";
+import {createServer} from "node:http";
+import {Server} from "socket.io";
+import socketHandler from "./socket.js";
 const app = express();
+const httpServer=createServer(app);
+
+const io=new Server(httpServer,{
+    cors: {
+        origin: "http://localhost:5173",
+        credentials: true,
+    },
+});
+
+socketHandler(io);
 
 app.use(cors({
   origin: "http://localhost:5173",
@@ -36,4 +49,4 @@ app.use((req, res) => {
 });
 
 // Trigger nodemon reload for prisma client update
-export default app;
+export default httpServer;

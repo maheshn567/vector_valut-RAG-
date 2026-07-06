@@ -2,6 +2,15 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Hooks/useAuthHook";
 import voiceAssistService from "../apis/voiceAssist";
+import { VoiceActivityDetector } from "../utils/vad";
+import {
+  startVoiceStream,
+  sendAudioChunk,
+  endVoiceStream,
+  onSpeechResponse,
+  onSocketError,
+  disconnectSocket
+} from "../apis/socket.api";
 import { getTenantApps } from "../apis/app.api";
 import { getAllRag } from "../apis/rag.api";
 import ShaderBackground from "../components/Conversation/voice-assiant/ShaderBackground";
@@ -58,6 +67,8 @@ export default function VoiceAssisantPage() {
   const audioChunksRef = useRef([]);
   const audioPlaybackRef = useRef(null);
   const recordingTimeoutRef = useRef(null);
+  const vadRef = useRef(null);
+  const streamRef = useRef(null);
 
   // Session duration timer states
   const [sessionTime, setSessionTime] = useState("00:00");
@@ -124,7 +135,7 @@ export default function VoiceAssisantPage() {
   // Audio Playback Handler
   const playAudioResponse = (base64Audio) => {
     if (!isSpeakerEnabled) {
-      setStatus("listening");
+      startListeningSession();
       return;
     }
 
@@ -133,108 +144,125 @@ export default function VoiceAssisantPage() {
         audioPlaybackRef.current.pause();
       }
 
+      // Pause speech VAD detection during playback
+      stopListeningSession();
+
       const audioUrl = `data:audio/wav;base64,${base64Audio}`;
       const audio = new Audio(audioUrl);
       audioPlaybackRef.current = audio;
       setStatus("speaking");
 
       audio.onended = () => {
-        setStatus("listening");
+        startListeningSession();
       };
 
       audio.onerror = (e) => {
         console.error("Audio playback error:", e);
-        setStatus("listening");
+        startListeningSession();
         toast.error("Audio playback encountered an error.");
       };
 
       audio.play().catch((err) => {
         console.error("Autoplay failed:", err);
-        setStatus("listening");
+        startListeningSession();
       });
     } catch (err) {
       console.error("Error setting up audio:", err);
-      setStatus("listening");
+      startListeningSession();
     }
   };
 
-  // Start Voice Recording
-  const startRecording = async () => {
+  // Start VAD Listening Session
+  const startListeningSession = async () => {
     if (isMuted) {
-      toast.warning("Microphone is currently muted.");
+      setStatus("idle");
       return;
     }
 
     try {
+      stopListeningSession();
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioChunksRef.current = [];
+      streamRef.current = stream;
+
+      const vad = new VoiceActivityDetector(stream, {
+        onSpeechStart: () => {
+          console.log("VAD: Speech started!");
+          startRecordingStream(stream);
+        },
+        onSpeechEnd: () => {
+          console.log("VAD: Speech ended (1-second silence detected)!");
+          stopRecordingStream();
+        },
+        silenceTimeout: 1000,
+        threshold: -50
+      });
+
+      vadRef.current = vad;
+      vad.start();
+      setStatus("listening");
+    } catch (err) {
+      console.error("Mic access denied:", err);
+      toast.error("Could not access microphone. Please check permissions.");
+      setStatus("idle");
+    }
+  };
+
+  // Stop VAD Listening Session
+  const stopListeningSession = () => {
+    if (vadRef.current) {
+      vadRef.current.stop();
+      vadRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+  };
+
+  // Start WebRecorder streaming to Socket
+  const startRecordingStream = (stream) => {
+    try {
+      startVoiceStream({
+        appId: selectedApp?.appId,
+        docId: selectedDoc?.docId,
+        topK: 5,
+        conversationId: activeConversationId || undefined,
+        transcribe: mode === "transcribe",
+        translation: mode === "translate",
+        tenantId,
+        userId: tenantId,
+      });
 
       const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
       mediaRecorderRef.current = mediaRecorder;
 
-      mediaRecorder.ondataavailable = (event) => {
+      mediaRecorder.ondataavailable = async (event) => {
         if (event.data && event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
+          const arrayBuffer = await event.data.arrayBuffer();
+          sendAudioChunk(arrayBuffer);
         }
-      };
-
-      mediaRecorder.onstop = async () => {
-        stream.getTracks().forEach((track) => track.stop());
-
-        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-        if (audioBlob.size < 2000) {
-          setStatus("listening");
-          return;
-        }
-
-        processAudioInput(audioBlob);
       };
 
       mediaRecorder.start(250);
       setStatus("recording");
-
-      recordingTimeoutRef.current = setTimeout(() => {
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
-          mediaRecorderRef.current.stop();
-        }
-      }, 12000);
     } catch (err) {
-      console.error("Mic access denied:", err);
-      toast.error("Could not access microphone. Please check permissions.");
-      setStatus("listening");
+      console.error("Failed to start MediaRecorder stream:", err);
     }
   };
 
-  // Stop Recording
-  const stopRecording = () => {
-    if (recordingTimeoutRef.current) {
-      clearTimeout(recordingTimeoutRef.current);
-    }
+  // Stop WebRecorder and request processing
+  const stopRecordingStream = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
       mediaRecorderRef.current.stop();
     }
+    endVoiceStream();
+    setStatus("processing");
   };
 
-  // Process voice audio through backend API
-  const processAudioInput = async (audioBlob) => {
-    setStatus("processing");
-    try {
-      const audioFile = new File([audioBlob], "speech.webm", { type: "audio/webm" });
-      
-      const payloadOptions = {
-        appId: selectedApp?.appId,
-        docId: selectedDoc?.docId,
-        topK: 5,
-        conversationId: activeConversationId || undefined
-      };
-
-      let res;
-      if (mode === "transcribe") {
-        res = await voiceAssistService.transcribeAudio(audioFile, tenantId, payloadOptions);
-      } else {
-        res = await voiceAssistService.translateAudio(audioFile, tenantId, payloadOptions);
-      }
-
+  // WebSocket Response and Error handlers
+  useEffect(() => {
+    onSpeechResponse((res) => {
       if (res?.success && res?.data) {
         const { answer, audio, userPrompt, conversationId } = res.data;
         
@@ -245,7 +273,6 @@ export default function VoiceAssisantPage() {
         setTranscriptionText("Voice prompt processed successfully.");
         setAiResponseText(answer || "I've processed your request.");
 
-        // Append turns to messages state
         const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
         const userMsg = {
           id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(),
@@ -270,29 +297,44 @@ export default function VoiceAssisantPage() {
         if (audio) {
           playAudioResponse(audio);
         } else {
-          setStatus("listening");
+          startListeningSession();
         }
-      } else {
-        throw new Error(res?.error?.message || "Service call failed");
       }
-    } catch (err) {
-      console.error("Failed to process voice command:", err);
+    });
+
+    onSocketError((err) => {
+      console.error("Socket error during voice stream:", err);
       toast.error(err.message || "Voice processing failed. Please try again.");
-      setStatus("listening");
+      startListeningSession();
+    });
+
+    return () => {
+      disconnectSocket();
+    };
+  }, [selectedDoc, activeConversationId, mode]);
+
+  // Start listening session once apps are loaded
+  useEffect(() => {
+    if (apps.length > 0) {
+      startListeningSession();
     }
-  };
+    return () => {
+      stopListeningSession();
+    };
+  }, [apps]);
 
   // Toggle Recording manually by clicking the orb
   const handleOrbClick = () => {
-    if (status === "listening") {
-      startRecording();
-    } else if (status === "recording") {
-      stopRecording();
+    if (status === "listening" || status === "recording") {
+      stopListeningSession();
+      setStatus("idle");
+    } else if (status === "idle") {
+      startListeningSession();
     } else if (status === "speaking") {
       if (audioPlaybackRef.current) {
         audioPlaybackRef.current.pause();
       }
-      setStatus("listening");
+      startListeningSession();
     }
   };
 
