@@ -29,11 +29,6 @@ export default function NavBar() {
               Pricing
             </Link>
           </li>
-          <li>
-            <Link to="/docs" className="text-sm font-medium text-[#d4e4fa]/75 hover:text-white transition-colors">
-              Docs
-            </Link>
-          </li>
         </ul>
       </div>
 

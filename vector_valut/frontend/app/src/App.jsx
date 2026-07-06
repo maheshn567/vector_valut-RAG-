@@ -9,6 +9,7 @@ import DocumentsPage from "./pages/DocumentPage"
 import ConversationPage from "./pages/ConversationPage"
 import VoiceAssisantPage from "./pages/VoiceAssisantPage"
 import SettingsPage from "./pages/SettingsPage"
+import PricingPage from "./pages/Pricing_page"
 import { Route, Routes, useLocation } from "react-router-dom"
 
 export default function App() {
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/documents" element={<DocumentsPage />} />
           <Route path="/conversations" element={<ConversationPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
           <Route path="/voice-assistant" element={<VoiceAssisantPage />} />
         </Routes>
       </main>
