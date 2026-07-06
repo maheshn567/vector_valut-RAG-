@@ -38,6 +38,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/signin" element={<Login />} />
+          <Route path="/signup" element={<Login />} />
           <Route path="/dashboard" element={<TenantDashboard />} />
           <Route path="/apps" element={<TenantAppPage />} />
           <Route path="/corpora" element={<CorporaPage />} />

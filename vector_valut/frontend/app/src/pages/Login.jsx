@@ -1,10 +1,14 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { loginTenant } from "../apis/tenant.api";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { loginTenant, registerTenant } from "../apis/tenant.api";
 import { signInWithGoogle } from "../apis/google-auth.api";
 import { toast } from "sonner";
 
 export default function Login() {
+  const location = useLocation();
+  const isSignUp = location.pathname === "/signup";
+
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -23,31 +27,73 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email || !password) {
-      toast.error("Please fill in all credentials.");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const response = await loginTenant({ email, password });
-      
-      if (response.success) {
-        // Store tenant metadata in local storage
-        localStorage.setItem("tenantId", response.data.tenantId);
-        localStorage.setItem("tenantName", response.data.name);
-        localStorage.setItem("tenantEmail", response.data.email);
-
-        toast.success("Successfully logged in!");
-        navigate("/dashboard");
-      } else {
-        toast.error(response.message || "Invalid credentials. Please try again.");
+    if (isSignUp) {
+      if (!name || !email || !password) {
+        toast.error("Please fill in all registration fields.");
+        return;
       }
-    } catch (err) {
-      console.error("Login request failed:", err);
-      toast.error(err.message || "Server connection failed. Please try again.");
-    } finally {
-      setIsLoading(false);
+      if (name.length < 3) {
+        toast.error("Name must be at least 3 characters long.");
+        return;
+      }
+      if (password.length < 6) {
+        toast.error("Password must be at least 6 characters long.");
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const regResponse = await registerTenant({ name, email, password });
+        if (regResponse.success) {
+          toast.success("Account registered successfully!");
+          
+          // Auto-login after registration
+          const loginResponse = await loginTenant({ email, password });
+          if (loginResponse.success) {
+            localStorage.setItem("tenantId", loginResponse.data.tenantId);
+            localStorage.setItem("tenantName", loginResponse.data.name);
+            localStorage.setItem("tenantEmail", loginResponse.data.email);
+            toast.success("Successfully logged in!");
+            navigate("/dashboard");
+          } else {
+            navigate("/signin");
+          }
+        } else {
+          toast.error(regResponse.message || "Registration failed. Please try again.");
+        }
+      } catch (err) {
+        console.error("Registration request failed:", err);
+        toast.error(err.response?.data?.message || err.message || "Registration failed.");
+      } finally {
+        setIsLoading(false);
+      }
+
+    } else {
+      if (!email || !password) {
+        toast.error("Please fill in all credentials.");
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const response = await loginTenant({ email, password });
+        
+        if (response.success) {
+          localStorage.setItem("tenantId", response.data.tenantId);
+          localStorage.setItem("tenantName", response.data.name);
+          localStorage.setItem("tenantEmail", response.data.email);
+
+          toast.success("Successfully logged in!");
+          navigate("/dashboard");
+        } else {
+          toast.error(response.message || "Invalid credentials. Please try again.");
+        }
+      } catch (err) {
+        console.error("Login request failed:", err);
+        toast.error(err.response?.data?.message || err.message || "Server connection failed. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -164,8 +210,12 @@ export default function Login() {
         <div className="w-full max-w-[460px] bg-[#11141c]/70 backdrop-blur-xl p-8 sm:p-10 rounded-[20px] border border-white/5 shadow-2xl relative my-auto">
           
           <header className="mb-8 text-left">
-            <h2 className="font-['Hanken_Grotesk'] text-2xl font-bold text-white mb-2">Sign in to your account</h2>
-            <p className="text-sm text-[#c8c4d7]/60">Welcome back to the infrastructure for AI.</p>
+            <h2 className="font-['Hanken_Grotesk'] text-2xl font-bold text-white mb-2">
+              {isSignUp ? "Create your account" : "Sign in to your account"}
+            </h2>
+            <p className="text-sm text-[#c8c4d7]/60">
+              {isSignUp ? "Get started with the infrastructure for AI." : "Welcome back to the infrastructure for AI."}
+            </p>
           </header>
 
           {/* Google OAuth Button */}
@@ -193,6 +243,24 @@ export default function Login() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5 text-left">
             
+            {/* Full Name */}
+            {isSignUp && (
+              <div className="space-y-2 group">
+                <label className="font-['JetBrains_Mono'] text-[11px] font-bold text-[#c8c4d7]/70 flex justify-between items-center px-1">
+                  <span>Full Name</span>
+                  <span className="material-symbols-outlined text-[14px] group-focus-within:text-[#6C5CE7] transition-colors">person</span>
+                </label>
+                <input 
+                  type="text"
+                  placeholder="John Doe"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full h-12 bg-[#0d1c2d]/70 border border-white/5 rounded-lg px-4 focus:outline-none focus:ring-1 focus:ring-[#6C5CE7]/50 focus:border-[#6C5CE7]/50 transition-all text-sm font-sans placeholder:text-[#c8c4d7]/30"
+                  required
+                />
+              </div>
+            )}
+
             {/* Work Email */}
             <div className="space-y-2 group">
               <label className="font-['JetBrains_Mono'] text-[11px] font-bold text-[#c8c4d7]/70 flex justify-between items-center px-1">
@@ -216,9 +284,11 @@ export default function Login() {
                   <span>Password</span>
                   <span className="material-symbols-outlined text-[14px] group-focus-within:text-[#6C5CE7] transition-colors">lock</span>
                 </label>
-                <a href="#forgot" className="text-[11px] font-['JetBrains_Mono'] text-[#6C5CE7] hover:text-[#5847d2] transition-colors">
-                  Forgot?
-                </a>
+                {!isSignUp && (
+                  <a href="#forgot" className="text-[11px] font-['JetBrains_Mono'] text-[#6C5CE7] hover:text-[#5847d2] transition-colors">
+                    Forgot?
+                  </a>
+                )}
               </div>
               <div className="relative">
                 <input 
@@ -242,18 +312,20 @@ export default function Login() {
             </div>
 
             {/* Remember me */}
-            <div className="flex items-center gap-2 px-1 py-1">
-              <input 
-                type="checkbox"
-                id="remember"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded border-white/10 bg-[#0d1c2d] text-[#6C5CE7] focus:ring-[#6C5CE7]/30 focus:ring-offset-0 cursor-pointer"
-              />
-              <label htmlFor="remember" className="text-xs text-[#c8c4d7]/60 cursor-pointer select-none">
-                Remember me for 30 days
-              </label>
-            </div>
+            {!isSignUp && (
+              <div className="flex items-center gap-2 px-1 py-1">
+                <input 
+                  type="checkbox"
+                  id="remember"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded border-white/10 bg-[#0d1c2d] text-[#6C5CE7] focus:ring-[#6C5CE7]/30 focus:ring-offset-0 cursor-pointer"
+                />
+                <label htmlFor="remember" className="text-xs text-[#c8c4d7]/60 cursor-pointer select-none">
+                  Remember me for 30 days
+                </label>
+              </div>
+            )}
 
             {/* Submit Button */}
             <button 
@@ -265,8 +337,10 @@ export default function Login() {
                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
               ) : (
                 <>
-                  <span>Sign in</span>
-                  <span className="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">login</span>
+                  <span>{isSignUp ? "Sign up" : "Sign in"}</span>
+                  <span className="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">
+                    {isSignUp ? "how_to_reg" : "login"}
+                  </span>
                 </>
               )}
             </button>
@@ -276,10 +350,21 @@ export default function Login() {
           {/* Footer Info */}
           <footer className="mt-8 text-center space-y-4">
             <p className="text-[13px] text-[#c8c4d7]/60">
-              Don't have an account?{" "}
-              <Link to="/signup" className="text-[#6C5CE7] font-semibold hover:underline underline-offset-4">
-                Get started free
-              </Link>
+              {isSignUp ? (
+                <>
+                  Already have an account?{" "}
+                  <Link to="/signin" className="text-[#6C5CE7] font-semibold hover:underline underline-offset-4">
+                    Sign in here
+                  </Link>
+                </>
+              ) : (
+                <>
+                  Don't have an account?{" "}
+                  <Link to="/signup" className="text-[#6C5CE7] font-semibold hover:underline underline-offset-4">
+                    Get started free
+                  </Link>
+                </>
+              )}
             </p>
             <div className="flex items-center justify-center gap-2 text-[11px] text-[#c8c4d7]/40 font-['JetBrains_Mono']">
               <span className="material-symbols-outlined text-[14px]">security</span>
