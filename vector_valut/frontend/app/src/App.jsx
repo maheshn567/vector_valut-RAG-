@@ -8,6 +8,7 @@ import CorporaPage from "./pages/CorporaPage"
 import DocumentsPage from "./pages/DocumentPage"
 import ConversationPage from "./pages/ConversationPage"
 import VoiceAssisantPage from "./pages/VoiceAssisantPage"
+import SettingsPage from "./pages/SettingsPage"
 import { Route, Routes, useLocation } from "react-router-dom"
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
     location.pathname.startsWith("/corpora") ||
     location.pathname.startsWith("/documents") ||
     location.pathname.startsWith("/conversations") ||
+    location.pathname.startsWith("/settings") ||
     location.pathname.startsWith("/voice-assistant");
 
   return (
@@ -37,6 +39,7 @@ export default function App() {
           <Route path="/corpora" element={<CorporaPage />} />
           <Route path="/documents" element={<DocumentsPage />} />
           <Route path="/conversations" element={<ConversationPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="/voice-assistant" element={<VoiceAssisantPage />} />
         </Routes>
       </main>
