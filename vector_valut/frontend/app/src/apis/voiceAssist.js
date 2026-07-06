@@ -12,11 +12,17 @@ const voiceAssistService = {
   },
 
   // Transcribe voice audio file (Uploads via multipart form data)
-  transcribeAudio: async (audioFile, userId) => {
+  transcribeAudio: async (audioFile, userId, options = {}) => {
     const formData = new FormData();
     formData.append("audio", audioFile);
     formData.append("user_id", userId);
     formData.append("transcribe", "true");
+    
+    if (options.appId) formData.append("appId", options.appId);
+    if (options.groupId) formData.append("groupId", options.groupId);
+    if (options.docId) formData.append("docId", options.docId);
+    if (options.topK) formData.append("topK", String(options.topK));
+    if (options.conversationId) formData.append("conversationId", options.conversationId);
     
     return api.post("/voice-assist/transcribe", formData, {
       headers: {
@@ -26,11 +32,17 @@ const voiceAssistService = {
   },
 
   // Translate voice audio file (Uploads via multipart form data)
-  translateAudio: async (audioFile, userId) => {
+  translateAudio: async (audioFile, userId, options = {}) => {
     const formData = new FormData();
     formData.append("audio", audioFile);
     formData.append("user_id", userId);
     formData.append("translation", "true");
+    
+    if (options.appId) formData.append("appId", options.appId);
+    if (options.groupId) formData.append("groupId", options.groupId);
+    if (options.docId) formData.append("docId", options.docId);
+    if (options.topK) formData.append("topK", String(options.topK));
+    if (options.conversationId) formData.append("conversationId", options.conversationId);
     
     return api.post("/voice-assist/translation", formData, {
       headers: {
@@ -40,20 +52,22 @@ const voiceAssistService = {
   },
 
   // Process text-to-speech query for transcription
-  transcribeText: async (text, userId) => {
+  transcribeText: async (text, userId, options = {}) => {
     return api.post("/voice-assist/transcribe", {
       text,
       user_id: userId,
       transcribe: true,
+      ...options
     });
   },
 
   // Process text-to-speech query for translation
-  translateText: async (text, userId) => {
+  translateText: async (text, userId, options = {}) => {
     return api.post("/voice-assist/translation", {
       text,
       user_id: userId,
       translation: true,
+      ...options
     });
   }
 };

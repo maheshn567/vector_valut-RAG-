@@ -13,8 +13,45 @@ export default function VoiceListenNav({
   setShowDocDropdown,
   mode,
   setMode,
-  onClose
+  onClose,
+  panelMode,
+  onToggleExpand
 }) {
+  if (panelMode === "live-transcript") {
+    return (
+      <header className="flex justify-between items-center py-4 h-16 w-full fixed top-0 left-0 px-6 md:px-16 z-30 bg-[#051424]/80 backdrop-blur-md border-b border-white/5">
+        <div className="flex items-center gap-4">
+          {/* Compact 40px pulsing orb button */}
+          <button 
+            onClick={onToggleExpand}
+            className="w-10 h-10 rounded-full bg-gradient-to-br from-[#6dfad2] to-[#c6bfff] animate-pulse cursor-pointer flex items-center justify-center border border-[#6dfad2]/20 hover:scale-105 active:scale-95 transition-all shadow-md"
+            title="Expand voice panel"
+          >
+            <span className="material-symbols-outlined text-sm text-[#160066] font-fill" style={{ fontVariationSettings: "'FILL' 1" }}>mic</span>
+          </button>
+          <div className="flex flex-col text-left">
+            <h1 className="text-sm md:text-base font-bold text-white leading-tight">Vector Vault Voice</h1>
+            <div className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#6dfad2] animate-ping"></span>
+              <span className="text-[10px] font-semibold text-[#c9c5d0] uppercase tracking-wider">Live Voice Session</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={onClose}
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 transition-colors text-xs font-bold uppercase tracking-wider cursor-pointer"
+            title="End call"
+          >
+            <span className="material-symbols-outlined text-sm">call_end</span>
+            End Call
+          </button>
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header className="w-full flex justify-between items-start z-30 relative">
       <div className="flex flex-col gap-4">

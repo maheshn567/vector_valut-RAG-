@@ -80,7 +80,8 @@ export default async function voice_assistant_controller(req, res) {
         docId,
         topK: topK || 5,
         conversationId,
-        userId: user_id
+        userId: user_id,
+        isVoiceSession: true
       }
     };
 
@@ -97,6 +98,7 @@ export default async function voice_assistant_controller(req, res) {
 
     const answerText = generatedResponse.data.data.answer;
     const citations = generatedResponse.data.data.citations || [];
+    const activeConvId = generatedResponse.data.data.conversationId;
 
     // 4. Synthesize final answer text to speech audio bytes
     const ttsResult = await process_voice(answerText, null, transcribe, translation);
@@ -114,9 +116,11 @@ export default async function voice_assistant_controller(req, res) {
     return res.status(200).json({
       success: true,
       data: {
+        userPrompt: userPrompt,
         answer: answerText,
         audio: ttsResult.data?.audio || null,
-        citations: citations
+        citations: citations,
+        conversationId: activeConvId
       }
     });
 

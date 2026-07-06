@@ -9,12 +9,19 @@ import VoiceListenNav from "../components/Conversation/voice-assiant/VoiceListen
 import VoiceSpeakNav from "../components/Conversation/voice-assiant/VoiceSpeakNav";
 import VoiceListenController from "../components/Conversation/voice-assiant/VoiceListenController";
 import VoiceAssistSpeakController from "../components/Conversation/voice-assiant/VoiceAssistSpeakController";
+import VoiceAssistTranscriptNav from "../components/Conversation/voice-assiant/VoiceAssistTranscriptNav";
+import VoiceAssistTranscriptInterface from "../components/Conversation/voice-assiant/VoiceAssistTranscriptInterface";
+import VoiceAssitTranscriptController from "../components/Conversation/voice-assiant/VoiceAssistTranscriptcontroller";
 import { toast } from "sonner";
 
 export default function VoiceAssisantPage() {
   const navigate = useNavigate();
   const { tenant } = useAuth();
   const tenantId = tenant?.tenantId || localStorage.getItem("tenantId");
+
+  // Panel modes:
+  // 'voice-active' (mic orb), 'live-transcript' (minimized tray), 'ended-transcript' (session finished)
+  const [panelMode, setPanelMode] = useState("voice-active");
 
   // Voice Session State
   // 'idle' | 'listening' | 'recording' | 'processing' | 'speaking'
@@ -35,11 +42,26 @@ export default function VoiceAssisantPage() {
   const [transcriptionText, setTranscriptionText] = useState("");
   const [aiResponseText, setAiResponseText] = useState("");
 
+  // Conversation history states
+  const [activeConversationId, setActiveConversationId] = useState(null);
+  const [messages, setMessages] = useState(() => {
+    try {
+      const stored = localStorage.getItem("voice_assistant_transcript");
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
   // MediaRecorder & Playback References
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const audioPlaybackRef = useRef(null);
   const recordingTimeoutRef = useRef(null);
+
+  // Session duration timer states
+  const [sessionTime, setSessionTime] = useState("00:00");
+  const sessionStartRef = useRef(Date.now());
 
   // Waveform heights state (32 bars)
   const [waveformHeights, setWaveformHeights] = useState(new Array(32).fill(8));
@@ -65,6 +87,20 @@ export default function VoiceAssisantPage() {
     }
     loadContexts();
   }, []);
+
+  // Sync session timer
+  useEffect(() => {
+    let timer;
+    if (panelMode !== "ended-transcript") {
+      timer = setInterval(() => {
+        const diff = Date.now() - sessionStartRef.current;
+        const mins = Math.floor(diff / 60000).toString().padStart(2, "0");
+        const secs = Math.floor((diff % 60000) / 1000).toString().padStart(2, "0");
+        setSessionTime(`${mins}:${secs}`);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [panelMode]);
 
   // Waveform bouncing micro-animations
   useEffect(() => {
@@ -143,24 +179,20 @@ export default function VoiceAssisantPage() {
       };
 
       mediaRecorder.onstop = async () => {
-        // Stop all track streams to release hardware
         stream.getTracks().forEach((track) => track.stop());
 
         const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
         if (audioBlob.size < 2000) {
-          // Audio too short / silent
           setStatus("listening");
           return;
         }
 
-        // Trigger processing pipeline
         processAudioInput(audioBlob);
       };
 
       mediaRecorder.start(250);
       setStatus("recording");
 
-      // Auto-stop recording after 12 seconds to prevent excessive payloads
       recordingTimeoutRef.current = setTimeout(() => {
         if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
           mediaRecorderRef.current.stop();
@@ -183,27 +215,57 @@ export default function VoiceAssisantPage() {
     }
   };
 
-  // Send Recorded Audio to express/python backend
+  // Process voice audio through backend API
   const processAudioInput = async (audioBlob) => {
     setStatus("processing");
     try {
-      // Reformat blob name for server multer compatibility
       const audioFile = new File([audioBlob], "speech.webm", { type: "audio/webm" });
       
+      const payloadOptions = {
+        appId: selectedApp?.appId,
+        docId: selectedDoc?.docId,
+        topK: 5,
+        conversationId: activeConversationId || undefined
+      };
+
       let res;
       if (mode === "transcribe") {
-        res = await voiceAssistService.transcribeAudio(audioFile, tenantId);
+        res = await voiceAssistService.transcribeAudio(audioFile, tenantId, payloadOptions);
       } else {
-        res = await voiceAssistService.translateAudio(audioFile, tenantId);
+        res = await voiceAssistService.translateAudio(audioFile, tenantId, payloadOptions);
       }
 
       if (res?.success && res?.data) {
-        const { answer, audio } = res.data;
-        setTranscriptionText("Voice prompt processed successfully.");
-        setAiResponseText(answer || "I've processed your translation request.");
+        const { answer, audio, userPrompt, conversationId } = res.data;
+        
+        if (conversationId) {
+          setActiveConversationId(conversationId);
+        }
 
-        // Save exchange to local storage transcripts history
-        saveToTranscriptHistory(answer);
+        setTranscriptionText("Voice prompt processed successfully.");
+        setAiResponseText(answer || "I've processed your request.");
+
+        // Append turns to messages state
+        const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        const userMsg = {
+          id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(),
+          role: "user",
+          text: userPrompt || "Spoken audio request",
+          time: timeStr
+        };
+        const assistantMsg = {
+          id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(),
+          role: "assistant",
+          text: answer,
+          time: timeStr,
+          citations: selectedDoc ? [{ docName: selectedDoc.docName }] : []
+        };
+
+        setMessages((prev) => {
+          const updated = [...prev, userMsg, assistantMsg];
+          localStorage.setItem("voice_assistant_transcript", JSON.stringify(updated));
+          return updated;
+        });
 
         if (audio) {
           playAudioResponse(audio);
@@ -220,36 +282,6 @@ export default function VoiceAssisantPage() {
     }
   };
 
-  // Append exchange to localStorage history
-  const saveToTranscriptHistory = (answer) => {
-    try {
-      const stored = localStorage.getItem("voice_assistant_transcript");
-      const messagesList = stored ? JSON.parse(stored) : [];
-
-      const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      
-      const newPrompt = {
-        id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(),
-        role: "user",
-        text: "Spoken audio request",
-        time: timeStr
-      };
-
-      const newAnswer = {
-        id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(),
-        role: "assistant",
-        text: answer,
-        time: timeStr,
-        citations: selectedDoc ? [{ docName: selectedDoc.docName }] : []
-      };
-
-      const updated = [...messagesList, newPrompt, newAnswer];
-      localStorage.setItem("voice_assistant_transcript", JSON.stringify(updated));
-    } catch (e) {
-      console.error("Failed to save transcript:", e);
-    }
-  };
-
   // Toggle Recording manually by clicking the orb
   const handleOrbClick = () => {
     if (status === "listening") {
@@ -257,7 +289,6 @@ export default function VoiceAssisantPage() {
     } else if (status === "recording") {
       stopRecording();
     } else if (status === "speaking") {
-      // Interrupt playback
       if (audioPlaybackRef.current) {
         audioPlaybackRef.current.pause();
       }
@@ -265,15 +296,64 @@ export default function VoiceAssisantPage() {
     }
   };
 
-  // End voice call session
+  // End voice call session - transitions to ended-transcript mode
   const handleEndCall = () => {
     if (audioPlaybackRef.current) {
       audioPlaybackRef.current.pause();
     }
     stopRecording();
     setStatus("idle");
+    setPanelMode("ended-transcript");
     toast.success("Voice session ended.");
-    navigate("/voice-transcript");
+  };
+
+  // Clear session logs
+  const handleClearHistory = () => {
+    localStorage.removeItem("voice_assistant_transcript");
+    setMessages([]);
+    toast.success("Transcript history cleared.");
+  };
+
+  // Export logs to txt file
+  const handleExportText = () => {
+    if (messages.length === 0) {
+      toast.warning("No conversation transcript to export.");
+      return;
+    }
+
+    try {
+      const fileContent = messages
+        .map((msg) => `[${msg.time}] ${msg.role.toUpperCase()}: ${msg.text}`)
+        .join("\n\n");
+
+      const blob = new Blob([fileContent], { type: "text/plain;charset=utf-8" });
+      const element = document.createElement("a");
+      element.href = URL.createObjectURL(blob);
+      element.download = `voice_transcript_${Date.now()}.txt`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      toast.success("Transcript exported successfully.");
+    } catch (err) {
+      console.error("Failed to export txt file:", err);
+      toast.error("Export failed. Please check permissions.");
+    }
+  };
+
+  // Share conversation logs
+  const handleShareSession = () => {
+    if (messages.length === 0) {
+      toast.warning("No conversation history to share.");
+      return;
+    }
+    navigator.clipboard.writeText(JSON.stringify(messages, null, 2));
+    toast.success("Transcript copied to clipboard. Ready to share!");
+  };
+
+  // Handle final exit, clears temp logs and goes back to panel 3
+  const handleBackToChat = () => {
+    localStorage.removeItem("voice_assistant_transcript");
+    navigate("/conversations");
   };
 
   // Keyboard shortcut listener for CMD/CTRL + K to type instead
@@ -291,7 +371,7 @@ export default function VoiceAssisantPage() {
   return (
     <div className="bg-[#051424] text-[#d5e4fa] min-h-screen overflow-hidden relative selection:bg-primary/30 font-sans">
       {/* 1. Full-screen WebGL Shader Background */}
-      <ShaderBackground opacity={0.55} />
+      <ShaderBackground opacity={panelMode === "ended-transcript" ? 0.35 : 0.55} />
 
       {/* 2. Subtle Grid overlay texture */}
       <div className="fixed inset-0 grid-overlay pointer-events-none z-0"></div>
@@ -299,70 +379,143 @@ export default function VoiceAssisantPage() {
       {/* Main Interactive UI Container */}
       <div className="fixed inset-0 z-10 flex flex-col justify-between items-center py-6 px-4 md:py-8 md:px-10 bg-gradient-to-b from-[#051424]/40 via-transparent to-[#051424]/80">
         
-        {/* Render Listening/Speaking Nav Headers */}
-        {status !== "speaking" ? (
-          <VoiceListenNav
-            selectedApp={selectedApp}
-            apps={apps}
-            setSelectedApp={setSelectedApp}
-            showAppDropdown={showAppDropdown}
-            setShowAppDropdown={setShowAppDropdown}
-            selectedDoc={selectedDoc}
-            documents={documents}
-            setSelectedDoc={setSelectedDoc}
-            showDocDropdown={showDocDropdown}
-            setShowDocDropdown={setShowDocDropdown}
-            mode={mode}
-            setMode={setMode}
-            onClose={() => navigate("/conversations")}
-          />
-        ) : (
-          <VoiceSpeakNav
-            selectedApp={selectedApp}
-            apps={apps}
-            setSelectedApp={setSelectedApp}
-            showAppDropdown={showAppDropdown}
-            setShowAppDropdown={setShowAppDropdown}
-            selectedDoc={selectedDoc}
-            documents={documents}
-            setSelectedDoc={setSelectedDoc}
-            showDocDropdown={showDocDropdown}
-            setShowDocDropdown={setShowDocDropdown}
-            mode={mode}
-            setMode={setMode}
-            onClose={() => navigate("/conversations")}
-          />
+        {/* Render Listening/Speaking Nav Headers when active */}
+        {panelMode !== "ended-transcript" && (
+          status !== "speaking" ? (
+            <VoiceListenNav
+              selectedApp={selectedApp}
+              apps={apps}
+              setSelectedApp={setSelectedApp}
+              showAppDropdown={showAppDropdown}
+              setShowAppDropdown={setShowAppDropdown}
+              selectedDoc={selectedDoc}
+              documents={documents}
+              setSelectedDoc={setSelectedDoc}
+              showDocDropdown={showDocDropdown}
+              setShowDocDropdown={setShowDocDropdown}
+              mode={mode}
+              setMode={setMode}
+              onClose={handleEndCall}
+              panelMode={panelMode}
+              onToggleExpand={() => setPanelMode("voice-active")}
+            />
+          ) : (
+            <VoiceSpeakNav
+              selectedApp={selectedApp}
+              apps={apps}
+              setSelectedApp={setSelectedApp}
+              showAppDropdown={showAppDropdown}
+              setShowAppDropdown={setShowAppDropdown}
+              selectedDoc={selectedDoc}
+              documents={documents}
+              setSelectedDoc={setSelectedDoc}
+              showDocDropdown={showDocDropdown}
+              setShowDocDropdown={setShowDocDropdown}
+              mode={mode}
+              setMode={setMode}
+              onClose={handleEndCall}
+              panelMode={panelMode}
+              onToggleExpand={() => setPanelMode("voice-active")}
+            />
+          )
         )}
 
-        {/* Render Listening/Speaking Controller Content */}
-        {status !== "speaking" ? (
-          <VoiceListenController
-            status={status}
-            waveformHeights={waveformHeights}
-            onOrbClick={handleOrbClick}
-            isMuted={isMuted}
-            setIsMuted={setIsMuted}
-            isSpeakerEnabled={isSpeakerEnabled}
-            setIsSpeakerEnabled={setIsSpeakerEnabled}
-            onEndCall={handleEndCall}
-            onTypeInstead={() => navigate("/conversations")}
-          />
-        ) : (
-          <VoiceAssistSpeakController
-            status={status}
-            aiResponseText={aiResponseText}
-            selectedDoc={selectedDoc}
-            onOrbClick={handleOrbClick}
-            onEndCall={handleEndCall}
-            onTabChange={(tab) => {
-              if (tab === "conversations") navigate("/conversations");
-              else if (tab === "corpora") navigate("/corpora");
-              else if (tab === "documents") navigate("/documents");
-            }}
-          />
+        {/* Render Active Voice Controls when active */}
+        {panelMode === "voice-active" && (
+          status !== "speaking" ? (
+            <VoiceListenController
+              status={status}
+              waveformHeights={waveformHeights}
+              onOrbClick={handleOrbClick}
+              isMuted={isMuted}
+              setIsMuted={setIsMuted}
+              isSpeakerEnabled={isSpeakerEnabled}
+              setIsSpeakerEnabled={setIsSpeakerEnabled}
+              onEndCall={handleEndCall}
+              onTypeInstead={() => navigate("/conversations")}
+            />
+          ) : (
+            <VoiceAssistSpeakController
+              status={status}
+              aiResponseText={aiResponseText}
+              selectedDoc={selectedDoc}
+              onOrbClick={handleOrbClick}
+              onEndCall={handleEndCall}
+              onTabChange={(tab) => {
+                if (tab === "conversations") navigate("/conversations");
+                else if (tab === "corpora") navigate("/corpora");
+                else if (tab === "documents") navigate("/documents");
+              }}
+              onSeeTranscript={() => setPanelMode("live-transcript")}
+            />
+          )
+        )}
+
+        {/* Render ended-transcript full viewport logs */}
+        {panelMode === "ended-transcript" && (
+          <div className="w-full flex-grow flex flex-col justify-between items-center z-20 h-full relative">
+            <VoiceAssistTranscriptNav 
+              sessionTime={sessionTime} 
+              onClose={handleBackToChat} 
+            />
+            <VoiceAssistTranscriptInterface 
+              messages={messages} 
+              navigate={navigate} 
+            />
+            <VoiceAssitTranscriptController
+              onClear={handleClearHistory}
+              onMicClick={() => {
+                setMessages([]);
+                localStorage.removeItem("voice_assistant_transcript");
+                sessionStartRef.current = Date.now();
+                setPanelMode("voice-active");
+                setStatus("listening");
+              }}
+              onExit={handleBackToChat}
+              onExport={handleExportText}
+              onShare={handleShareSession}
+            />
+          </div>
         )}
 
       </div>
+
+      {/* 4. Slide-up live-transcript Sheet Tray */}
+      <div 
+        className={`fixed inset-x-0 bottom-0 bg-[#051424]/95 backdrop-blur-xl border-t border-white/10 z-40 transition-all duration-500 ease-out flex flex-col ${
+          panelMode === "live-transcript" ? "h-[72vh] opacity-100 translate-y-0" : "h-0 opacity-0 translate-y-full pointer-events-none"
+        }`}
+      >
+        <div className="flex-grow flex flex-col h-full overflow-hidden relative">
+          <VoiceAssistTranscriptInterface 
+            messages={messages} 
+            navigate={navigate} 
+          />
+          <div className="p-4 bg-[#010f1f]/95 border-t border-white/5 flex items-center justify-between z-50">
+            <button 
+              onClick={handleClearHistory}
+              className="px-4 py-2 rounded-full border border-white/10 text-white/60 hover:text-white transition-colors text-xs font-semibold uppercase cursor-pointer"
+            >
+              Clear Logs
+            </button>
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => setPanelMode("voice-active")}
+                className="px-5 py-2 rounded-full bg-[#6dfad2]/20 border border-[#6dfad2]/30 hover:bg-[#6dfad2]/30 text-[#6dfad2] transition-all text-xs font-bold uppercase tracking-wider cursor-pointer font-sans"
+              >
+                Resume Voice
+              </button>
+              <button 
+                onClick={handleEndCall}
+                className="px-5 py-2 rounded-full bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 transition-colors text-xs font-bold uppercase tracking-wider cursor-pointer"
+              >
+                End Session
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }

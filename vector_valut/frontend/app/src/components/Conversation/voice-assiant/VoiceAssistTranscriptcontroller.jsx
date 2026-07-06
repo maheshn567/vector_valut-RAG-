@@ -41,10 +41,11 @@ export default function VoiceAssitTranscriptController({
 
             <button 
               onClick={onExit}
-              className="w-12 h-12 rounded-full bg-red-500/15 border border-red-500/20 flex items-center justify-center hover:bg-red-500/30 transition-all hover:scale-105 active:scale-95 text-red-400 cursor-pointer"
-              title="Exit chat"
+              className="px-5 py-2.5 rounded-full bg-red-500/10 border border-red-500/20 flex items-center gap-2 hover:bg-red-500/20 transition-all hover:scale-105 active:scale-95 text-red-400 font-semibold text-xs uppercase tracking-wider cursor-pointer"
+              title="Back to chat"
             >
-              <span className="material-symbols-outlined">call_end</span>
+              <span className="material-symbols-outlined text-sm">chat</span>
+              Back to Chat
             </button>
           </div>
 

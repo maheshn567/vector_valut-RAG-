@@ -92,7 +92,12 @@ export default function ChatHistoryComp({
         </button>
 
         <div className="flex justify-between items-start mb-1 pr-6">
-          <span className={`text-[12px] truncate w-40 font-medium ${isActive ? "text-primary" : "text-on-surface"}`}>
+          <span className={`text-[12px] truncate w-40 font-medium flex items-center gap-1.5 ${isActive ? "text-primary" : "text-on-surface"}`}>
+            {c.metadata?.isVoiceSession && (
+              <span className="material-symbols-outlined text-[14px] text-[#6dfad2] shrink-0 font-fill" style={{ fontVariationSettings: "'FILL' 1" }}>
+                mic
+              </span>
+            )}
             {title}
           </span>
           <span className="text-[10px] text-on-surface-variant font-mono shrink-0">

@@ -193,7 +193,8 @@ export async function generateAnswer(req, res) {
         const currentMetadata = conversation.metadata && typeof conversation.metadata === 'object' ? conversation.metadata : {};
         const updatedMetadata = {
           ...currentMetadata,
-          lastMessageExcerpt: userPrompt.trim().slice(0, 60) + (userPrompt.trim().length > 60 ? "..." : "")
+          lastMessageExcerpt: userPrompt.trim().slice(0, 60) + (userPrompt.trim().length > 60 ? "..." : ""),
+          isVoiceSession: req.body.isVoiceSession !== undefined ? req.body.isVoiceSession : currentMetadata.isVoiceSession
         };
 
         await prisma.conversation.update({
@@ -218,7 +219,8 @@ export async function generateAnswer(req, res) {
           ],
           metadata: {
             title: title,
-            lastMessageExcerpt: userPrompt.trim().slice(0, 60) + (userPrompt.trim().length > 60 ? "..." : "")
+            lastMessageExcerpt: userPrompt.trim().slice(0, 60) + (userPrompt.trim().length > 60 ? "..." : ""),
+            isVoiceSession: req.body.isVoiceSession || false
           },
         },
       });

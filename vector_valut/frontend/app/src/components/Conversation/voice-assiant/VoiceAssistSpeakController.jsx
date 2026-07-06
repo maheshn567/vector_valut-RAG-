@@ -6,7 +6,8 @@ export default function VoiceAssistSpeakController({
   selectedDoc,
   onOrbClick,
   onEndCall,
-  onTabChange
+  onTabChange,
+  onSeeTranscript
 }) {
   return (
     <div className="w-full flex-grow flex flex-col justify-between items-center z-20">
@@ -103,6 +104,17 @@ export default function VoiceAssistSpeakController({
       {/* Symmetrical Bottom Control Bar */}
       <nav className="w-full px-6 md:px-10 mt-auto flex flex-col items-center gap-3 z-30 relative pb-1">
         
+        {/* See Transcript Pill (Only visible when speaking/response is loaded) */}
+        {aiResponseText && (
+          <button 
+            onClick={onSeeTranscript}
+            className="mb-2 bg-[#e4deff]/10 hover:bg-[#e4deff]/20 border border-[#e4deff]/20 backdrop-blur-md px-5 py-2 rounded-full flex items-center gap-2 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer shadow-lg text-[#e4deff] font-semibold text-xs uppercase tracking-wider"
+          >
+            <span className="material-symbols-outlined text-[16px]">assignment</span>
+            <span>See Transcript</span>
+          </button>
+        )}
+
         {/* Interrupt Session Trigger */}
         <button 
           onClick={onOrbClick}
