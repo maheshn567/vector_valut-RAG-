@@ -167,7 +167,7 @@ export default function TenantAppPage() {
             </span>
             <nav className="hidden md:flex items-center gap-6">
               <Link className="text-[#c8c4d7] hover:text-[#6c5ce7] transition-colors font-['JetBrains_Mono'] text-[10px] uppercase tracking-wider" to="/pricing">Pricing</Link>
-              <a className="text-[#c8c4d7] hover:text-[#6c5ce7] transition-colors font-['JetBrains_Mono'] text-[10px] uppercase tracking-wider" href="#changelog">Changelog</a>
+              <Link className="text-[#c8c4d7] hover:text-[#6c5ce7] transition-colors font-['JetBrains_Mono'] text-[10px] uppercase tracking-wider" to="/changelog">Changelog</Link>
             </nav>
           </div>
           

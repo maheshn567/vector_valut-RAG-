@@ -10,6 +10,7 @@ import ConversationPage from "./pages/ConversationPage"
 import VoiceAssisantPage from "./pages/VoiceAssisantPage"
 import SettingsPage from "./pages/SettingsPage"
 import PricingPage from "./pages/Pricing_page"
+import ChangelogPage from "./pages/Chaneleog"
 import { Route, Routes, useLocation } from "react-router-dom"
 
 export default function App() {
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="/conversations" element={<ConversationPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/changelog" element={<ChangelogPage />} />
           <Route path="/voice-assistant" element={<VoiceAssisantPage />} />
         </Routes>
       </main>
