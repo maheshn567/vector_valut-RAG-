@@ -97,7 +97,9 @@ export default function socketHandler(io) {
         await generateAnswer(mockReq, mockRes);
 
         if (!generatedResponse || generatedResponse.code !== 200 || !generatedResponse.data?.success) {
-          throw new Error(generatedResponse?.data?.message || "RAG engine failed to generate an answer");
+          const errMsg = generatedResponse?.data?.message || "RAG engine failed to generate an answer";
+          const errDetail = generatedResponse?.data?.error ? `: ${generatedResponse.data.error}` : "";
+          throw new Error(`${errMsg}${errDetail}`);
         }
 
         const answerText = generatedResponse.data.data.answer;

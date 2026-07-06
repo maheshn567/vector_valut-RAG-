@@ -17,6 +17,12 @@ export async function generateAnswer(req, res) {
   }
 
   const tenantId = req.tenantId;
+  if (!tenantId) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized: Missing tenant context",
+    });
+  }
   const { userPrompt, appId, groupId, docId, topK, conversationId, userId } = result.data;
 
   try {

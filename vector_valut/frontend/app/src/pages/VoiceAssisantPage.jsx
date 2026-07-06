@@ -222,6 +222,13 @@ export default function VoiceAssisantPage() {
 
   // Start WebRecorder streaming to Socket
   const startRecordingStream = (stream) => {
+    if (!tenantId) {
+      console.error("Missing tenantId for voice assistant session.");
+      toast.error("Session expired or missing organization context. Please sign in again.");
+      setStatus("idle");
+      return;
+    }
+
     try {
       startVoiceStream({
         appId: selectedApp?.appId,
