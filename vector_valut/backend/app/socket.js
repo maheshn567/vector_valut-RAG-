@@ -51,8 +51,8 @@ export default function socketHandler(io) {
           originalname: "speech.webm",
         };
 
-        const transcribe = options.transcribe !== false;
-        const translation = options.translation === true;
+        const transcribe = options.transcribe === true;
+        const translation = options.translation !== false;
 
         // A. Transcribe User Speech
         console.log(`[Socket ${socket.id}] Transcribing audio chunks...`);

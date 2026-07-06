@@ -35,7 +35,7 @@ export default function VoiceAssisantPage() {
   // Voice Session State
   // 'idle' | 'listening' | 'recording' | 'processing' | 'speaking'
   const [status, setStatus] = useState("listening");
-  const [mode, setMode] = useState("transcribe"); // 'transcribe' | 'translate'
+  const [mode, setMode] = useState("translate"); // 'transcribe' | 'translate'
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
 
