@@ -174,11 +174,7 @@ export default function ConversationPage() {
       };
 
       // 3. Request LLM generation matching tenant credentials
-      const res = await askLlm(requestData, {
-        headers: {
-          "X-API-Key": selectedApp.apiKey,
-        },
-      });
+      const res = await askLlm(requestData);
 
       if (res.success && res.data) {
         const { answer, citations, conversationId: newConvId } = res.data;

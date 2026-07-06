@@ -1,13 +1,13 @@
 import { Router } from "express";
-import { verifyApiKey } from "../middleware/auth.middleware.js";
+import { verifyJWT } from "../middleware/auth.middleware.js";
 import { cunkRetreival, getContextById } from "../controllers/retrieval.controller.js";
 import { generateAnswer } from "../controllers/generate.controller.js";
 
 const router = Router();
 
-// Programmatic retrieval and RAG endpoints, secured using App specific API key
-router.post("/retrieve", verifyApiKey, cunkRetreival);
-router.post("/context", verifyApiKey, getContextById);
-router.post("/ask", verifyApiKey, generateAnswer);
+// Retrieval and RAG endpoints, secured using standard User JWT Session
+router.post("/retrieve", verifyJWT, cunkRetreival);
+router.post("/context", verifyJWT, getContextById);
+router.post("/ask", verifyJWT, generateAnswer);
 
 export default router;

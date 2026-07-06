@@ -73,42 +73,4 @@ export async function verifyJWT(req, res, next) {
   }
 }
 
-/**
- * Middleware: Verify App API Key (Looks in x-api-key header)
- * Programmatic access for widgets or external services.
- */
-export async function verifyApiKey(req, res, next) {
-  try {
-    const apiKey = req.headers["x-api-key"];
-    if (!apiKey) {
-      return res.status(401).json({
-        success: false,
-        message: "Access Denied: Missing X-API-Key header",
-      });
-    }
 
-    // Verify key in App table
-    const app = await prisma.app.findFirst({
-      where: { apiKey },
-    });
-
-    if (!app || !app.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized: Invalid or inactive API Key",
-      });
-    }
-
-    // Attach app and tenant context
-    req.appId = app.appId;
-    req.tenantId = app.tenantId;
-
-    next();
-  } catch (error) {
-    console.error("API Key Verification Error:", error.message);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error during verification",
-    });
-  }
-}

@@ -2,20 +2,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 export default function TenAntApp({ tenantApp, onToggleStatus, onEdit, onDelete }) {
-  const [isRevealed, setIsRevealed] = useState(false);
-
-  const handleCopyKey = () => {
-    if (tenantApp.apiKey) {
-      navigator.clipboard.writeText(tenantApp.apiKey);
-      toast.success("API key copied to clipboard!");
-    } else {
-      toast.error("No API key available to copy.");
-    }
-  };
-
-  const maskedKey = tenantApp.apiKey
-    ? `${tenantApp.apiKey.slice(0, 8)}••••••••••••••••••••••••${tenantApp.apiKey.slice(-4)}`
-    : "sk-live-••••••••••••••••••••••••";
 
   return (
     <article className="bg-[#11141C] border border-white/5 rounded-xl p-6 flex flex-col relative group hover:border-[#6c5ce7]/30 transition-colors text-left">
@@ -72,35 +58,7 @@ export default function TenAntApp({ tenantApp, onToggleStatus, onEdit, onDelete 
         {tenantApp.appDescription || "No description provided."}
       </p>
 
-      {/* API Key Panel */}
-      <div className="mt-auto bg-[#0d1c2d] p-3 rounded-lg border border-white/5 flex items-center justify-between">
-        <div className="flex flex-col gap-1 overflow-hidden text-left">
-          <span className="font-['JetBrains_Mono'] text-[9px] text-[#c8c4d7]/40 uppercase tracking-widest">
-            API Key
-          </span>
-          <code className="font-['JetBrains_Mono'] text-xs text-white truncate max-w-[150px] select-all">
-            {isRevealed ? tenantApp.apiKey : maskedKey}
-          </code>
-        </div>
-        <div className="flex gap-1 shrink-0">
-          <button 
-            onClick={() => setIsRevealed(!isRevealed)}
-            className="p-1.5 rounded hover:bg-white/5 text-[#c8c4d7] hover:text-[#6c5ce7] transition-colors cursor-pointer" 
-            title={isRevealed ? "Hide" : "Reveal"}
-          >
-            <span className="material-symbols-outlined text-sm">
-              {isRevealed ? "visibility_off" : "visibility"}
-            </span>
-          </button>
-          <button 
-            onClick={handleCopyKey}
-            className="p-1.5 rounded hover:bg-white/5 text-[#c8c4d7] hover:text-[#6c5ce7] transition-colors cursor-pointer" 
-            title="Copy"
-          >
-            <span className="material-symbols-outlined text-sm">content_copy</span>
-          </button>
-        </div>
-      </div>
+
     </article>
   );
 }

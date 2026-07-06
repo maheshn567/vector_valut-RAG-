@@ -16,14 +16,10 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-    const apiKey = localStorage.getItem("apiKey") || sessionStorage.getItem("apiKey");
     const tenantId = localStorage.getItem("tenantId") || sessionStorage.getItem("tenantId");
 
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
-    }
-    if (apiKey) {
-      config.headers["X-API-Key"] = apiKey;
     }
     if (tenantId) {
       config.headers["X-Tenant-Id"] = tenantId;

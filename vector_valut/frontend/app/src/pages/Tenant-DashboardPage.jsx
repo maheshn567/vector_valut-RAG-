@@ -390,20 +390,19 @@ export default function TenantDashboard() {
                       <th className="px-6 py-4 font-['JetBrains_Mono'] text-[10px] text-[#c8c4d7]/50 uppercase tracking-widest">Name</th>
                       <th className="px-6 py-4 font-['JetBrains_Mono'] text-[10px] text-[#c8c4d7]/50 uppercase tracking-widest">Type</th>
                       <th className="px-6 py-4 font-['JetBrains_Mono'] text-[10px] text-[#c8c4d7]/50 uppercase tracking-widest">Status</th>
-                      <th className="px-6 py-4 font-['JetBrains_Mono'] text-[10px] text-[#c8c4d7]/50 uppercase tracking-widest">API Credentials</th>
                       <th className="px-6 py-4 font-['JetBrains_Mono'] text-[10px] text-[#c8c4d7]/50 uppercase tracking-widest text-right">Registered</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
                     {dataLoading ? (
                       <tr>
-                        <td colSpan="5" className="px-6 py-8 text-center text-sm text-[#c8c4d7]/40 font-mono">
+                        <td colSpan="4" className="px-6 py-8 text-center text-sm text-[#c8c4d7]/40 font-mono">
                           FETCHING TENANT APPLICATIONS FROM SECURE REGISTRY...
                         </td>
                       </tr>
                     ) : apps.length === 0 ? (
                       <tr>
-                        <td colSpan="5" className="px-6 py-8 text-center text-sm text-[#c8c4d7]/40 font-mono">
+                        <td colSpan="4" className="px-6 py-8 text-center text-sm text-[#c8c4d7]/40 font-mono">
                           NO APPLICATIONS CREATED YET. CLICK "NEW APPLICATION" TO GET STARTED.
                         </td>
                       </tr>
@@ -424,9 +423,6 @@ export default function TenantDashboard() {
                               <span className={`w-2 h-2 rounded-full ${appItem.isActive ? 'bg-[#4bddb7]' : 'bg-[#ffb4ab]'}`}></span>
                               <span className="text-xs">{appItem.isActive ? "Active" : "Disabled"}</span>
                             </div>
-                          </td>
-                          <td className="px-6 py-4 text-xs font-mono text-[#c6bfff]">
-                            <code>{appItem.apiKey ? `vault_live_...${appItem.apiKey.slice(-6)}` : "No Key"}</code>
                           </td>
                           <td className="px-6 py-4 text-xs text-right text-[#c8c4d7]/50 font-mono">
                             {new Date(appItem.createdAt).toLocaleDateString()}
