@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import LLM_response_fromater from "../../../utility/LLM_response_fromater.jsx";
 
-export default function VoiceAssistTranscriptInterface({ messages, navigate }) {
+export default function VoiceAssistTranscriptInterface({ messages, navigate, isTray = false }) {
   const transcriptEndRef = useRef(null);
 
   useEffect(() => {
@@ -11,7 +11,9 @@ export default function VoiceAssistTranscriptInterface({ messages, navigate }) {
   }, [messages]);
 
   return (
-    <main className="flex-grow mt-24 mb-28 overflow-y-auto px-4 md:px-10 space-y-8 scroll-smooth pb-10 max-h-[calc(100vh-210px)] select-text z-20 relative">
+    <main className={`flex-1 w-full overflow-y-auto px-4 md:px-10 space-y-6 scroll-smooth select-text z-20 relative ${
+      isTray ? "pt-6 pb-2" : "pt-24 pb-28"
+    }`}>
       {messages.map((msg) => (
         <div 
           key={msg.id}

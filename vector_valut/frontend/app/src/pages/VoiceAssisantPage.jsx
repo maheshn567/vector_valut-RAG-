@@ -461,6 +461,7 @@ export default function VoiceAssisantPage() {
             <VoiceAssistTranscriptInterface 
               messages={messages} 
               navigate={navigate} 
+              isTray={false}
             />
             <VoiceAssitTranscriptController
               onClear={handleClearHistory}
@@ -490,6 +491,7 @@ export default function VoiceAssisantPage() {
           <VoiceAssistTranscriptInterface 
             messages={messages} 
             navigate={navigate} 
+            isTray={true}
           />
           <div className="p-4 bg-[#010f1f]/95 border-t border-white/5 flex items-center justify-between z-50">
             <button 
