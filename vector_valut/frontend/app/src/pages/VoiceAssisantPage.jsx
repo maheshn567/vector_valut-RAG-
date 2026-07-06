@@ -343,10 +343,11 @@ export default function VoiceAssisantPage() {
     if (audioPlaybackRef.current) {
       audioPlaybackRef.current.pause();
     }
-    stopRecording();
+    stopListeningSession();
+    disconnectSocket();
     setStatus("idle");
-    setPanelMode("ended-transcript");
     toast.success("Voice session ended.");
+    handleBackToChat();
   };
 
   // Clear session logs
