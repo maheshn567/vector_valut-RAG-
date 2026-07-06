@@ -238,6 +238,33 @@ health = vault.status(
             </p>
           </div>
 
+          {/* Large Card: Voice LLM Chats */}
+          <div className="md:col-span-2 bg-[#11141c]/50 border border-white/5 backdrop-blur-sm p-8 rounded-2xl flex flex-col justify-between hover:border-white/10 transition-all duration-300">
+            <div>
+              <div className="w-12 h-12 rounded-xl bg-[#6C5CE7]/10 border border-[#6C5CE7]/20 flex items-center justify-center mb-6">
+                <span className="material-symbols-outlined text-[#6C5CE7] text-2xl">graphic_eq</span>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3 font-['Hanken_Grotesk']">Voice AI Assistant</h3>
+              <p className="text-[#d5e4fa]/70 mb-8 max-w-md">
+                Talk directly to your knowledge stores with low-latency speech pipelines. Supports real-time transcription visualizers and state-driven voice chat loops.
+              </p>
+            </div>
+            {/* Interactive speech wave preview visual */}
+            <div className="flex items-center gap-3 bg-[#051424] border border-[#6C5CE7]/10 p-4 rounded-xl self-start w-full max-w-md justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="w-2 h-2 rounded-full bg-[#4BDDB7] animate-ping"></span>
+                <span className="text-xs font-bold text-white font-mono">Assistant Listening...</span>
+              </div>
+              <div className="flex gap-1 items-end h-5">
+                <div className="w-1 h-3 bg-[#6C5CE7] rounded-full animate-pulse"></div>
+                <div className="w-1 h-5 bg-[#4BDDB7] rounded-full animate-pulse" style={{ animationDelay: "0.2s" }}></div>
+                <div className="w-1 h-4 bg-[#6C5CE7] rounded-full animate-pulse" style={{ animationDelay: "0.4s" }}></div>
+                <div className="w-1 h-2 bg-[#4BDDB7] rounded-full animate-pulse" style={{ animationDelay: "0.1s" }}></div>
+                <div className="w-1 h-4 bg-[#c6bfff] rounded-full animate-pulse" style={{ animationDelay: "0.3s" }}></div>
+              </div>
+            </div>
+          </div>
+
           {/* Small Card 2: Pluggable providers */}
           <div className="bg-[#11141c]/50 border border-white/5 backdrop-blur-sm p-8 rounded-2xl hover:border-white/10 transition-all duration-300">
             <div className="w-12 h-12 rounded-xl bg-[#4BDDB7]/10 border border-[#4BDDB7]/20 flex items-center justify-center mb-6">
@@ -260,13 +287,18 @@ health = vault.status(
             </p>
           </div>
 
-          {/* Small Card 4: Formats */}
-          <div className="bg-[#11141c]/50 border border-white/5 backdrop-blur-sm p-8 rounded-2xl hover:border-white/10 transition-all duration-300">
-            <div className="w-12 h-12 rounded-xl bg-[#ffb77d]/10 border border-[#ffb77d]/20 flex items-center justify-center mb-6">
-              <span className="material-symbols-outlined text-[#ffb77d] text-2xl">upload_file</span>
+          {/* Large Card 4: Formats */}
+          <div className="md:col-span-2 bg-[#11141c]/50 border border-white/5 backdrop-blur-sm p-8 rounded-2xl flex flex-col justify-between hover:border-white/10 transition-all duration-300">
+            <div>
+              <div className="w-12 h-12 rounded-xl bg-[#ffb77d]/10 border border-[#ffb77d]/20 flex items-center justify-center mb-6">
+                <span className="material-symbols-outlined text-[#ffb77d] text-2xl">upload_file</span>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3 font-['Hanken_Grotesk']">Any File, Handled</h3>
+              <p className="text-sm text-[#d5e4fa]/70 leading-relaxed max-w-md">
+                Upload PDFs, Markdown, TXT, or CSV files. Our pipeline parses document layers, cleans formatting, and pushes chunk structures to indexes automatically.
+              </p>
             </div>
-            <h3 className="text-xl font-bold text-white mb-3 font-['Hanken_Grotesk']">Any File, Handled</h3>
-            <div className="mt-4 w-full rounded-xl overflow-hidden bg-[#051424] border border-white/5 flex items-center justify-center p-2">
+            <div className="mt-6 w-full rounded-xl overflow-hidden bg-[#051424] border border-white/5 flex items-center justify-center p-2">
               <img 
                 alt="Supported File Types" 
                 className="w-full h-24 object-cover object-center rounded-lg opacity-85" 
