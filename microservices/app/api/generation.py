@@ -2,14 +2,14 @@ from fastapi import APIRouter,Depends
 import time
 from app.models.requests import GenerateRequest
 from app.providers.llm.openai_provider import OpenAILLMProvider
-from app.providers.llm.Llama_3_1_8B_Instruct import Llama318BInstructProvider
+from app.providers.llm.kimi_k3 import KimiK3Provider
 from app.utility.security import validate_api_key
 
 router = APIRouter()
 
 # Initialize the providers (clients load lazily on first request)
 openai_llm = OpenAILLMProvider()
-llama_llm = Llama318BInstructProvider()
+kimi_llm = KimiK3Provider()
 
 @router.post("/generate")
 async def generate_answer(request: GenerateRequest,api_key: str = Depends(validate_api_key)):
@@ -25,18 +25,18 @@ async def generate_answer(request: GenerateRequest,api_key: str = Depends(valida
         llm_response = None
         used_provider = prov_lower
         
-        if prov_lower in ("nvidia", "llama", "llama-3.1-8b-instruct", "llama-3.3-70b-instruct"):
+        if prov_lower in ("nvidia", "kimi", "kimi-k3"):
             try:
-                print("Attempting RAG generation via Llama 3.1 (NVIDIA)...")
-                llm_response = llama_llm.generate(
+                print("Attempting RAG generation via Kimi K3 (NVIDIA)...")
+                llm_response = kimi_llm.generate(
                     query=request.query,
                     context=context_dicts,
                     system_prompt=request.system_prompt,
                     history=request.history
                 )
-                used_provider = "nvidia (llama-3.1-8b-instruct)"
+                used_provider = "nvidia (kimi-k3)"
             except Exception as nvidia_error:
-                print(f"Llama 3.1 (NVIDIA) generation failed: {str(nvidia_error)}. Falling back to OpenAI...")
+                print(f"Kimi K3 (NVIDIA) generation failed: {str(nvidia_error)}. Falling back to OpenAI...")
                 llm_response = openai_llm.generate(
                     query=request.query,
                     context=context_dicts,

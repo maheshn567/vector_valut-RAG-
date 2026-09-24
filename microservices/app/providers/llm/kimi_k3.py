@@ -4,11 +4,11 @@ import re
 from typing import List, Dict, Any
 from .base import LLMProvider
 
-class Llama318BInstructProvider(LLMProvider):
+class KimiK3Provider(LLMProvider):
     def __init__(self):
         # Lazily initialize client to prevent startup failure when NVIDIA_API_KEY is missing
         self.client = None
-        self.model = "meta/llama-3.1-8b-instruct"
+        self.model = "moonshotai/kimi-k3"
 
     def _get_client(self) -> OpenAI:
         if self.client is None:
@@ -54,10 +54,11 @@ class Llama318BInstructProvider(LLMProvider):
         response = client.chat.completions.create(
             model=self.model,
             messages=messages,
-            temperature=0.2,
-            top_p=0.7,
-            max_tokens=1024,
-            stream=False
+            temperature=1,
+            max_tokens=16384,
+            seed=0,
+            stream=False,
+            extra_body={"reasoning_effort": "max"}
         )
         
         # 4. Extract the answer and usage statistics

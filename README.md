@@ -25,7 +25,7 @@ Built with clean separation of concerns, VectorVault demonstrates production-rea
 - 🏢 **Multi-Tenant Architecture**: Complete data isolation across tenants, applications (`apps`), document corpora (`groups`), and vector chunks. Supports both user session tokens (JWT) and programmatically isolated `X-API-Key` access.
 - ⚡ **Two-Stage Hybrid RAG Pipeline**: First-stage vector search via PostgreSQL `pgvector` (1024-dimensional embeddings via Voyage AI) paired with a second-stage cross-encoder **Voyage Reranker** for maximum retrieval precision.
 - 🎙️ **Full-Duplex Interactive Voice Assistant**: Real-time voice interaction leveraging Voice Activity Detection (VAD), **Whisper Large v3 / Turbo** speech-to-text, LLM context generation, and Text-to-Speech (TTS) response synthesis.
-- 🧩 **Decoupled Python AI Microservices**: Modular FastAPI services for document text extraction, semantic chunking, embeddings, reranking, LLM response generation (**Llama 3.1 8B Instruct** & **OpenAI**), and translation.
+- 🧩 **Decoupled Python AI Microservices**: Modular FastAPI services for document text extraction, semantic chunking, embeddings, reranking, LLM response generation (**Kimi K3** & **OpenAI**), and translation.
 - 📊 **Real-Time Data Pipeline & Visualizer**: Interactive UI components that provide visual transparency into document extraction, text chunking, embedding generation, and vector indexing.
 - 🎨 **Modern UI/UX**: Built with React 19, Vite, Tailwind CSS v4, and dynamic WebGL/Canvas shader animations for voice mode.
 
@@ -70,7 +70,7 @@ flowchart TB
         ChunkService["Semantic Chunking Engine"]
         EmbedService["Voyage AI Vector Embedder (1024d)"]
         RerankService["Voyage Cross-Encoder Reranker"]
-        LLMService["Llama 3.1 8B / OpenAI Generation"]
+        LLMService["Kimi K3 / OpenAI Generation"]
         VoiceService["Whisper Large v3 (STT) & TTS"]
     end
 
@@ -91,7 +91,7 @@ flowchart TB
 | **Backend Gateway** | Node.js, Express v5, Prisma ORM, Socket.IO, Zod Validation, Better Auth / JWT, Multer |
 | **Primary Database** | PostgreSQL, `pgvector` (1024-dimensional vector similarity indexing), Raw SQL Prisma queries |
 | **AI Microservices** | Python 3.10+, FastAPI, Uvicorn, Pydantic, PyMuPDF, Trafilatura, python-docx/pptx |
-| **AI Providers & Models** | **Embeddings**: Voyage AI (`voyage-3-lite`), **Reranker**: Voyage Reranker, **LLM**: Llama 3.1 8B Instruct, OpenAI GPT, **Speech**: Whisper Large v3 / Turbo, Custom TTS |
+| **AI Providers & Models** | **Embeddings**: Voyage AI (`voyage-3-lite`), **Reranker**: Voyage Reranker, **LLM**: Kimi K3, OpenAI GPT, **Speech**: Whisper Large v3 / Turbo, Custom TTS |
 
 ---
 
@@ -104,7 +104,7 @@ vector_valut-RAG/
 │   └── app/
 │       ├── api/                    # Microservice routers (chunking, embedding, reranking, generation, voice)
 │       ├── models/                 # Pydantic request/response schemas
-│       ├── providers/              # Integration with Voyage AI, Llama 3.1 8B, OpenAI, Whisper
+│       ├── providers/              # Integration with Voyage AI, Kimi K3, OpenAI, Whisper
 │       └── services/               # Text-to-Speech & translation helpers
 └── vector_valut/
     ├── backend/                    # ⚡ Node.js Express & Prisma API Gateway
@@ -141,7 +141,7 @@ vector_valut-RAG/
 1. **Query Embedding**: User submits a question. The query text is converted into a 1024-dim vector.
 2. **Candidate Retrieval (Stage 1)**: PostgreSQL runs cosine vector similarity search (`<=>` operator) restricted by `tenantId`, `appId`, and `groupId` to fetch the top candidate chunks (e.g., top 20).
 3. **Cross-Encoder Reranking (Stage 2)**: Candidates are passed to the **Voyage Reranker** microservice, which scores semantic relevance against the query and filters down to the top K chunks (e.g., top 5).
-4. **LLM Generation**: The reranked context and prompt are passed to **Llama 3.1 8B Instruct** (or OpenAI) to synthesize a grounded answer with source citations.
+4. **LLM Generation**: The reranked context and prompt are passed to **Kimi K3** (or OpenAI) to synthesize a grounded answer with source citations.
 
 ---
 
@@ -175,7 +175,7 @@ VectorVault implements multi-tenancy at every tier of the database and applicati
 - **Node.js**: v18+ or Bun
 - **Python**: v3.10+
 - **PostgreSQL**: v15+ with `pgvector` extension enabled
-- **API Keys**: Voyage AI API Key and OpenAI API Key (or local Llama 3.1 endpoint)
+- **API Keys**: Voyage AI API Key and OpenAI API Key (or NVIDIA-hosted Kimi K3)
 
 ### Required API Keys
 
@@ -183,7 +183,7 @@ VectorVault implements multi-tenancy at every tier of the database and applicati
 | :--- | :--- | :--- |
 | `VOYAGE_API_KEY` | Embeddings & reranking | Yes |
 | `OPENAI_API_KEY` | LLM answer generation | Yes (or `NVIDIA_API_KEY`) |
-| `NVIDIA_API_KEY` | LLM generation via Llama 3.1 8B Instruct | Alternative to OpenAI |
+| `NVIDIA_API_KEY` | LLM generation via Kimi K3 | Alternative to OpenAI |
 | `RAG_SERVICE_API_KEY` | Shared secret between the backend gateway and Python microservices | Yes |
 | `GROQ_API_KEY` | Voice assistant text-to-speech | Voice mode only |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth login | Google sign-in only |
