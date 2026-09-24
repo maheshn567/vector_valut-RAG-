@@ -1,7 +1,14 @@
 # 🚀 VectorVault RAG Platform
 
-> **Enterprise-Grade Multi-Tenant RAG, Vector Search Engine & Interactive Voice Assistant**  
-> *A full-stack, production-ready AI platform featuring modular Python FastAPI microservices, a Node.js/Express multi-tenant API gateway with PostgreSQL & pgvector, and a high-performance React 19 dashboard.*
+> **Multi-Tenant RAG, Vector Search Engine & Interactive Voice Assistant**  
+> *A full-stack AI platform featuring modular Python FastAPI microservices, a Node.js/Express multi-tenant API gateway with PostgreSQL & pgvector, and a high-performance React 19 dashboard.*
+
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-pgvector-4169E1?logo=postgresql&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
 
@@ -13,7 +20,7 @@ Built with clean separation of concerns, VectorVault demonstrates production-rea
 
 ---
 
-## 🌟 Key Features & Recruiter Highlights
+## 🌟 Key Features
 
 - 🏢 **Multi-Tenant Architecture**: Complete data isolation across tenants, applications (`apps`), document corpora (`groups`), and vector chunks. Supports both user session tokens (JWT) and programmatically isolated `X-API-Key` access.
 - ⚡ **Two-Stage Hybrid RAG Pipeline**: First-stage vector search via PostgreSQL `pgvector` (1024-dimensional embeddings via Voyage AI) paired with a second-stage cross-encoder **Voyage Reranker** for maximum retrieval precision.
@@ -21,6 +28,20 @@ Built with clean separation of concerns, VectorVault demonstrates production-rea
 - 🧩 **Decoupled Python AI Microservices**: Modular FastAPI services for document text extraction, semantic chunking, embeddings, reranking, LLM response generation (**Llama 3.1 8B Instruct** & **OpenAI**), and translation.
 - 📊 **Real-Time Data Pipeline & Visualizer**: Interactive UI components that provide visual transparency into document extraction, text chunking, embedding generation, and vector indexing.
 - 🎨 **Modern UI/UX**: Built with React 19, Vite, Tailwind CSS v4, and dynamic WebGL/Canvas shader animations for voice mode.
+
+---
+
+## 📸 Screenshots
+
+> _Add screenshots/GIFs below before sharing this repo — visuals convert far better than text for a first impression._
+
+| Dashboard / Corpora Manager | RAG Chat Interface |
+| :---: | :---: |
+| _add screenshot_ | _add screenshot_ |
+
+| Voice Assistant Mode | Data Pipeline Visualizer |
+| :---: | :---: |
+| _add screenshot_ | _add screenshot_ |
 
 ---
 
@@ -218,12 +239,22 @@ npm run dev
 
 ---
 
+## 🧠 Design Decisions & Trade-offs
+
+- **Two-stage retrieval instead of vector search alone**: Raw cosine similarity over-fetches semantically similar but contextually weak matches. Adding a cross-encoder reranker as a second pass trades a small latency cost for materially better precision on the chunks that actually reach the LLM.
+- **Prisma raw SQL for vector queries**: Prisma's query builder doesn't support `pgvector`'s `<=>` distance operator natively, so retrieval queries drop to raw SQL while the rest of the app (tenant/app/group CRUD) stays on the Prisma ORM — keeping type safety everywhere it's available without blocking on ORM limitations.
+- **Python microservices split from the Node gateway**: embedding, reranking, transcription, and LLM inference are CPU/GPU-bound and benefit from Python's ML ecosystem (PyTorch, Transformers), while the gateway's job — auth, tenancy, request orchestration, WebSockets — is I/O-bound and better served by Node's event loop. Splitting them lets each service scale independently.
+- **Tenant → App → Group hierarchy**: modeled after real multi-tenant SaaS needs — one tenant can run several distinct bots (e.g., HR Bot, Support Bot) each with its own isolated document corpus, rather than flattening everything under a single tenant-level namespace.
+
+---
+
 ## 📄 License & Contact
 
-This project is created for demonstration and showcase purposes.
+This project is licensed under the [MIT License](LICENSE) and built for demonstration and showcase purposes.
 
 - **Developer**: Mahesh N.
-- **Repository**: [VectorVault RAG Platform](https://github.com/)
+- **Email**: [maheshnmahesh567@gmail.com](mailto:maheshnmahesh567@gmail.com)
+- **Repository**: [VectorVault RAG Platform](https://github.com/maheshn567/vector_valut-RAG-)
 
 ---
 *VectorVault RAG — Enterprise Multi-Tenant AI Search & Retrieval Architecture*
