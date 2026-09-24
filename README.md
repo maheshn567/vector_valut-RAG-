@@ -90,7 +90,7 @@ flowchart TB
 | **Frontend Dashboard** | React 19, Vite 8, Tailwind CSS v4, TanStack React Query, React Router v7, React Syntax Highlighter, Lucide Icons |
 | **Backend Gateway** | Node.js, Express v5, Prisma ORM, Socket.IO, Zod Validation, Better Auth / JWT, Multer |
 | **Primary Database** | PostgreSQL, `pgvector` (1024-dimensional vector similarity indexing), Raw SQL Prisma queries |
-| **AI Microservices** | Python 3.10+, FastAPI, PyTorch, Transformers, Uvicorn, Pydantic |
+| **AI Microservices** | Python 3.10+, FastAPI, Uvicorn, Pydantic, PyMuPDF, Trafilatura, python-docx/pptx |
 | **AI Providers & Models** | **Embeddings**: Voyage AI (`voyage-3-lite`), **Reranker**: Voyage Reranker, **LLM**: Llama 3.1 8B Instruct, OpenAI GPT, **Speech**: Whisper Large v3 / Turbo, Custom TTS |
 
 ---
@@ -189,7 +189,7 @@ python3 -m venv venv
 source venv/bin/activate
 
 # Install dependencies
-pip install fastapi uvicorn pydantic python-dotenv requests voyageai openai torch transformers
+pip install -r requirements.txt
 
 # Configure Environment
 cp .env.example .env   # Add VOYAGE_API_KEY, OPENAI_API_KEY, etc.
@@ -243,7 +243,7 @@ npm run dev
 
 - **Two-stage retrieval instead of vector search alone**: Raw cosine similarity over-fetches semantically similar but contextually weak matches. Adding a cross-encoder reranker as a second pass trades a small latency cost for materially better precision on the chunks that actually reach the LLM.
 - **Prisma raw SQL for vector queries**: Prisma's query builder doesn't support `pgvector`'s `<=>` distance operator natively, so retrieval queries drop to raw SQL while the rest of the app (tenant/app/group CRUD) stays on the Prisma ORM — keeping type safety everywhere it's available without blocking on ORM limitations.
-- **Python microservices split from the Node gateway**: embedding, reranking, transcription, and LLM inference are CPU/GPU-bound and benefit from Python's ML ecosystem (PyTorch, Transformers), while the gateway's job — auth, tenancy, request orchestration, WebSockets — is I/O-bound and better served by Node's event loop. Splitting them lets each service scale independently.
+- **Python microservices split from the Node gateway**: document extraction, chunking, and calls to embedding/reranking/transcription/LLM providers benefit from Python's data and ML tooling ecosystem, while the gateway's job — auth, tenancy, request orchestration, WebSockets — is I/O-bound and better served by Node's event loop. Splitting them lets each service scale independently.
 - **Tenant → App → Group hierarchy**: modeled after real multi-tenant SaaS needs — one tenant can run several distinct bots (e.g., HR Bot, Support Bot) each with its own isolated document corpus, rather than flattening everything under a single tenant-level namespace.
 
 ---
