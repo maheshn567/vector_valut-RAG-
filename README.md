@@ -177,6 +177,19 @@ VectorVault implements multi-tenancy at every tier of the database and applicati
 - **PostgreSQL**: v15+ with `pgvector` extension enabled
 - **API Keys**: Voyage AI API Key and OpenAI API Key (or local Llama 3.1 endpoint)
 
+### Required API Keys
+
+| Key | Purpose | Required |
+| :--- | :--- | :--- |
+| `VOYAGE_API_KEY` | Embeddings & reranking | Yes |
+| `OPENAI_API_KEY` | LLM answer generation | Yes (or `NVIDIA_API_KEY`) |
+| `NVIDIA_API_KEY` | LLM generation via Llama 3.1 8B Instruct | Alternative to OpenAI |
+| `RAG_SERVICE_API_KEY` | Shared secret between the backend gateway and Python microservices | Yes |
+| `GROQ_API_KEY` | Voice assistant text-to-speech | Voice mode only |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth login | Google sign-in only |
+
+Get keys from [Voyage AI](https://www.voyageai.com/), [OpenAI](https://platform.openai.com/), [NVIDIA NIM](https://build.nvidia.com/), and [Groq](https://console.groq.com/).
+
 ---
 
 ### 1. Python AI Microservices Setup
@@ -192,7 +205,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Configure Environment
-cp .env.example .env   # Add VOYAGE_API_KEY, OPENAI_API_KEY, etc.
+cp .env.example .env   # Fill in VOYAGE_API_KEY, OPENAI_API_KEY, RAG_SERVICE_API_KEY, etc.
 
 # Start FastAPI server
 python3 server.py
@@ -209,10 +222,7 @@ cd vector_valut/backend
 # Install dependencies
 npm install
 
-# Setup Environment Variables (.env)
-# DATABASE_URL="postgresql://user:password@localhost:5432/vectorvault?schema=public"
-# JWT_SECRET="your_jwt_secret"
-# MICROSERVICE_URL="http://localhost:8000"
+cp .env.example .env   # Fill in DATABASE_URL, JWT_SECRET_KEY, RAG_SERVICE_API_KEY, etc.
 
 # Apply Prisma Migrations
 npx prisma migrate dev
