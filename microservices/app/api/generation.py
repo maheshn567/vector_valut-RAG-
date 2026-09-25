@@ -3,6 +3,7 @@ import time
 from app.models.requests import GenerateRequest
 from app.providers.llm.openai_provider import OpenAILLMProvider
 from app.providers.llm.kimi_k3 import KimiK3Provider
+from app.providers.llm.groq_provider import GroqLLMProvider
 from app.utility.security import validate_api_key
 
 router = APIRouter()
@@ -10,6 +11,7 @@ router = APIRouter()
 # Initialize the providers (clients load lazily on first request)
 openai_llm = OpenAILLMProvider()
 kimi_llm = KimiK3Provider()
+groq_llm = GroqLLMProvider()
 
 @router.post("/generate")
 async def generate_answer(request: GenerateRequest,api_key: str = Depends(validate_api_key)):
@@ -25,7 +27,26 @@ async def generate_answer(request: GenerateRequest,api_key: str = Depends(valida
         llm_response = None
         used_provider = prov_lower
         
-        if prov_lower in ("nvidia", "kimi", "kimi-k3"):
+        if prov_lower in ("groq", "gpt-oss-120b"):
+            try:
+                print("Attempting RAG generation via Groq (gpt-oss-120b)...")
+                llm_response = groq_llm.generate(
+                    query=request.query,
+                    context=context_dicts,
+                    system_prompt=request.system_prompt,
+                    history=request.history
+                )
+                used_provider = "groq (gpt-oss-120b)"
+            except Exception as groq_error:
+                print(f"Groq generation failed: {str(groq_error)}. Falling back to OpenAI...")
+                llm_response = openai_llm.generate(
+                    query=request.query,
+                    context=context_dicts,
+                    system_prompt=request.system_prompt,
+                    history=request.history
+                )
+                used_provider = "openai (fallback)"
+        elif prov_lower in ("nvidia", "kimi", "kimi-k3"):
             try:
                 print("Attempting RAG generation via Kimi K3 (NVIDIA)...")
                 llm_response = kimi_llm.generate(

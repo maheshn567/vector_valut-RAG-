@@ -45,11 +45,11 @@ class GenerateRequest(BaseModel):
     query: str
     context: List[RetrievedResult]
     system_prompt: str
-    provider: str = "nvidia"
+    provider: str = "groq"
     history: Optional[List[Dict[str, str]]] = None
 
 # VOICE ASSISTANT REQUEST
 class VoiceChatRequest(BaseModel):
     query: Optional[str] = None
-    provider: str = "nvidia"
+    provider: str = "groq"
     audio: Optional[UploadFile] = None
