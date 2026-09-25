@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../Hooks/useAuthHook";
 import voiceAssistService from "../apis/voiceAssist";
 import { VoiceActivityDetector } from "../utils/vad";
@@ -13,6 +13,7 @@ import {
 } from "../apis/socket.api";
 import { getTenantApps } from "../apis/app.api";
 import { getAllRag } from "../apis/rag.api";
+import { getConversation } from "../apis/conversation.api";
 import ShaderBackground from "../components/Conversation/voice-assiant/ShaderBackground";
 import VoiceListenNav from "../components/Conversation/voice-assiant/VoiceListenNav";
 import VoiceSpeakNav from "../components/Conversation/voice-assiant/VoiceSpeakNav";
@@ -25,6 +26,7 @@ import { toast } from "sonner";
 
 export default function VoiceAssisantPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { tenant } = useAuth();
   const tenantId = tenant?.tenantId || localStorage.getItem("tenantId");
 
@@ -52,7 +54,11 @@ export default function VoiceAssisantPage() {
   const [aiResponseText, setAiResponseText] = useState("");
 
   // Conversation history states
-  const [activeConversationId, setActiveConversationId] = useState(null);
+  // If opened from an existing chat (?conversationId=...), continue that conversation
+  // instead of always starting a brand new one.
+  const [activeConversationId, setActiveConversationId] = useState(
+    () => searchParams.get("conversationId") || null
+  );
   const [messages, setMessages] = useState(() => {
     try {
       const stored = localStorage.getItem("voice_assistant_transcript");
@@ -61,6 +67,33 @@ export default function VoiceAssisantPage() {
       return [];
     }
   });
+
+  // If continuing an existing chat, replace the local transcript cache with that
+  // conversation's real history instead of showing stale/unrelated cached messages.
+  useEffect(() => {
+    const existingConversationId = searchParams.get("conversationId");
+    if (!existingConversationId) return;
+
+    (async () => {
+      try {
+        const res = await getConversation(existingConversationId);
+        if (res?.success && Array.isArray(res.data?.messages)) {
+          const loadedMessages = res.data.messages.map((m) => ({
+            id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(),
+            role: m.role,
+            text: m.content,
+            time: m.timestamp
+              ? new Date(m.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+              : "",
+            citations: m.citations || [],
+          }));
+          setMessages(loadedMessages);
+        }
+      } catch (err) {
+        console.error("Failed to load existing conversation history for voice mode:", err);
+      }
+    })();
+  }, [searchParams]);
 
   // MediaRecorder & Playback References
   const mediaRecorderRef = useRef(null);

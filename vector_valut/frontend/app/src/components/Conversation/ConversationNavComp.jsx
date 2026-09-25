@@ -11,6 +11,8 @@ export default function ConversationNavComp({
   onRerankerToggle,
   isHistoryOpen,
   onExpandHistory,
+  onVoiceMode,
+  activeConversationId,
 }) {
   return (
     <header className="h-16 bg-[#11141C]/75 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-6 shrink-0 z-15">
@@ -69,6 +71,14 @@ export default function ConversationNavComp({
 
       {/* Reranker Toggle Controls on Right */}
       <div className="flex items-center gap-4">
+        <button
+          onClick={() => onVoiceMode?.(activeConversationId)}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#6c5ce7]/15 hover:bg-[#6c5ce7]/25 border border-[#6c5ce7]/30 rounded-full text-[12px] font-mono text-[#c9beff] transition-all cursor-pointer"
+          title={activeConversationId ? "Continue this chat in Voice Mode" : "Start a new Voice Mode session"}
+        >
+          <span className="material-symbols-outlined text-[16px]">mic</span>
+          Voice Mode
+        </button>
         <div className="flex items-center gap-3">
           <span className="text-[11px] font-mono uppercase tracking-wider text-on-surface-variant select-none">
             Reranker

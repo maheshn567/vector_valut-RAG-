@@ -100,6 +100,7 @@ export default function TenantDashboard() {
 
       if (response && response.success) {
         toast.success("Workspace successfully configured!");
+        sessionStorage.setItem("dismissedOnboarding", "true");
         await checkAuth(); // Sync settings with Auth Context
         setShowOnboardingModal(false);
       } else {

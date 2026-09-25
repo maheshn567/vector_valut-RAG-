@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Hooks/useAuthHook.jsx";
 import { toast } from "sonner";
 import SideBar from "../layout/SideBar.jsx";
@@ -17,6 +18,7 @@ import {
 import { askLlm } from "../apis/query.api";
 
 export default function ConversationPage() {
+  const navigate = useNavigate();
   const { tenant } = useAuth();
   
   // RAG Workspace Layout/Config State
@@ -283,6 +285,14 @@ export default function ConversationPage() {
             onRerankerToggle={() => setRerankerOn(!rerankerOn)}
             isHistoryOpen={isHistoryOpen}
             onExpandHistory={() => setIsHistoryOpen(true)}
+            activeConversationId={activeConversationId}
+            onVoiceMode={(conversationId) =>
+              navigate(
+                conversationId
+                  ? `/voice-assistant?conversationId=${conversationId}`
+                  : "/voice-assistant"
+              )
+            }
           />
 
           {/* Chat Messages Canvas */}
