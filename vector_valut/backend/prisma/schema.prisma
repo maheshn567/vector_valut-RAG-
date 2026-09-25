@@ -16,6 +16,7 @@ model Tenant {
   email         String         @unique
   password      String
   orgName       String         @map("org_name")
+  subdomain     String?        @unique
   s3BucketName  String         @map("s3_bucket_name")
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")

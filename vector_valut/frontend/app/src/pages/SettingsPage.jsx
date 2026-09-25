@@ -8,7 +8,7 @@ import RAGDefaults from "../components/Settings/RAGDefaults";
 import DangerZone from "../components/Settings/DangerZone";
 
 export default function SettingsPage() {
-  const { tenant } = useAuth();
+  const { tenant, checkAuth } = useAuth();
   
   // Tab state: 'profile' | 'security' | 'rag-defaults' | 'danger-zone'
   const [activeView, setActiveView] = useState("profile");
@@ -65,7 +65,7 @@ export default function SettingsPage() {
 
           {/* Form Content Area */}
           <div className="max-w-[900px] w-full mx-auto py-10 px-8 flex-grow pb-16">
-            {activeView === "profile" && <Profile tenant={tenant} />}
+            {activeView === "profile" && <Profile tenant={tenant} onUpdated={checkAuth} />}
             {activeView === "security" && <Security_Auth />}
             {activeView === "rag-defaults" && <RAGDefaults />}
             {activeView === "danger-zone" && <DangerZone />}

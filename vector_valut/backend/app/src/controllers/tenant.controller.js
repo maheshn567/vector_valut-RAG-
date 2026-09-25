@@ -77,6 +77,12 @@ export async function updateTenantController(req, res) {
       data: tenantWithoutPassword,
     });
   } catch (error) {
+    if (error.code === "P2002" && error.meta?.target?.includes("subdomain")) {
+      return res.status(409).json({
+        success: false,
+        message: "That subdomain is already taken. Please choose another.",
+      });
+    }
     console.error("Error in tenant updating:", error);
     return res.status(500).json({
       success: false,

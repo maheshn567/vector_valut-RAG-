@@ -1,6 +1,10 @@
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:3000/voice", {
+// Relative path (no host): socket.io-client connects to the page's own origin,
+// and Vite's dev server proxy (see vite.config.js) forwards it to the backend.
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "";
+
+const socket = io(`${SOCKET_URL}/voice`, {
   withCredentials: true,
   autoConnect: false,
 });

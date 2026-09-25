@@ -15,9 +15,24 @@ import socketHandler from "./socket.js";
 const app = express();
 const httpServer=createServer(app);
 
+// Allow the base dev origin plus any tenant vanity subdomain, whether accessed
+// directly via Vite (e.g. acmecorp.localhost:5173) or through the nginx reverse
+// proxy on port 80 (e.g. acmecorp.mahesh.com).
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true; // non-browser requests (curl, server-to-server)
+  return (
+    /^http:\/\/([a-z0-9-]+\.)?localhost:5173$/.test(origin) ||
+    /^http:\/\/([a-z0-9-]+\.)?mahesh\.com$/.test(origin)
+  );
+};
+
+const corsOptionsDelegate = (origin, callback) => {
+  callback(null, isAllowedOrigin(origin));
+};
+
 const io=new Server(httpServer,{
     cors: {
-        origin: "http://localhost:5173",
+        origin: (origin, callback) => callback(null, isAllowedOrigin(origin)),
         credentials: true,
     },
 });
@@ -25,7 +40,7 @@ const io=new Server(httpServer,{
 socketHandler(io);
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: corsOptionsDelegate,
   credentials: true,
 }));
 app.use(express.json());

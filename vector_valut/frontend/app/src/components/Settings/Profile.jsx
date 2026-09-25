@@ -1,13 +1,35 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { updateTenant } from "../../apis/tenant.api";
 
-export default function Profile({ tenant }) {
+export default function Profile({ tenant, onUpdated }) {
   const [fullName, setFullName] = useState(tenant?.name || "Sarah Johnson");
   const email = tenant?.email || "sarah.j@acmecorp.com";
+
+  const [subdomain, setSubdomain] = useState(tenant?.subdomain || "");
+  const [isSavingSubdomain, setIsSavingSubdomain] = useState(false);
 
   const handleSave = (e) => {
     e.preventDefault();
     toast.success("Profile saved successfully!");
+  };
+
+  const handleSaveSubdomain = async (e) => {
+    e.preventDefault();
+    setIsSavingSubdomain(true);
+    try {
+      const res = await updateTenant({ subdomain });
+      if (res?.success) {
+        toast.success("Workspace URL updated!");
+        await onUpdated?.();
+      } else {
+        toast.error(res?.message || "Failed to update workspace URL.");
+      }
+    } catch (err) {
+      toast.error(err.message || "Failed to update workspace URL.");
+    } finally {
+      setIsSavingSubdomain(false);
+    }
   };
 
   return (
@@ -59,11 +81,40 @@ export default function Profile({ tenant }) {
         </div>
 
         <div className="flex justify-end pt-8">
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="px-8 py-3 bg-[#6c5ce7] hover:bg-[#5b4cc4] text-white rounded-xl font-label-md font-semibold text-xs uppercase tracking-wider shadow-lg hover:scale-95 active:opacity-80 transition-all duration-200 cursor-pointer"
           >
             Save profile
+          </button>
+        </div>
+      </form>
+
+      {/* Workspace vanity URL */}
+      <form onSubmit={handleSaveSubdomain} className="glass-card rounded-xl p-8 space-y-6 mt-8">
+        <div className="space-y-1">
+          <h3 className="font-label-md text-sm font-bold text-white">Workspace URL</h3>
+          <p className="text-[11px] text-[#c9c5d0]/60">
+            Choose a subdomain for your workspace (local dev only). Visiting it will show your dashboard directly.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            className="flex-1 bg-[#051424] border border-white/10 rounded-lg px-4 py-3 font-body-sm text-sm text-white focus:outline-none focus:border-[#6c5ce7]/60 focus:ring-1 focus:ring-[#6c5ce7]/30 transition-all"
+            type="text"
+            placeholder="e.g. acmecorp"
+            value={subdomain}
+            onChange={(e) => setSubdomain(e.target.value.toLowerCase())}
+          />
+          <span className="text-xs text-[#c9c5d0]/50 font-mono whitespace-nowrap">.localhost:5173</span>
+        </div>
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={isSavingSubdomain}
+            className="px-8 py-3 bg-[#6c5ce7] hover:bg-[#5b4cc4] text-white rounded-xl font-label-md font-semibold text-xs uppercase tracking-wider shadow-lg hover:scale-95 active:opacity-80 transition-all duration-200 cursor-pointer disabled:opacity-50"
+          >
+            {isSavingSubdomain ? "Saving..." : "Save workspace URL"}
           </button>
         </div>
       </form>

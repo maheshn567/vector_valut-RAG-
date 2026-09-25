@@ -16,6 +16,15 @@ export const createTenantSchema = z.object({
     )
     .refine((val) => !val.includes(".."), "S3 bucket name cannot contain consecutive periods")
     .optional(),
+  subdomain: z
+    .string()
+    .min(3, "Subdomain must be at least 3 characters long")
+    .max(63, "Subdomain must not exceed 63 characters")
+    .regex(
+      /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/,
+      "Subdomain must be lowercase alphanumeric or hyphens, and begin/end with an alphanumeric character"
+    )
+    .optional(),
 });
 
 // Schema for validating Tenant updates (allows partial fields)

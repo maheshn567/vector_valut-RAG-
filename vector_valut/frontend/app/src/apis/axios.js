@@ -1,8 +1,9 @@
 import axios from "axios";
 
 // In Vite, environment variables are accessed via import.meta.env
-// Fallback to localhost backend API gateway
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api/v1";
+// Relative path: Vite's dev server proxy (see vite.config.js) forwards this to the
+// backend, so it works identically on localhost:5173 and any *.mahesh.com subdomain.
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api/v1";
 
 const api = axios.create({
   baseURL: BASE_URL,

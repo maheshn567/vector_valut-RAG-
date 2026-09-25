@@ -7,13 +7,31 @@ import {
   tenantValidationLogin,
 } from "../validation/tenantAuth.validation.js";
 
-// Cookie configurations for security
-const COOKIE_OPTIONS = {
+// Base cookie configuration for security
+const BASE_COOKIE_OPTIONS = {
   httpOnly: true, // Prevents client-side scripts from reading the cookie (Mitigates XSS)
   secure: process.env.NODE_ENV === "production", // HTTPS only in production
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days (matching JWT expiration)
   sameSite: "strict", // Mitigates CSRF attacks
 };
+
+// Scope the cookie to whichever parent dev domain the request actually came in on
+// (neither is a public suffix, so browsers allow this), so the session carries over
+// when a tenant is redirected to their vanity subdomain, e.g. acmecorp.mahesh.com
+// or acmecorp.localhost:5173. Falls back to the exact host in production.
+function getCookieOptions(req) {
+  if (process.env.NODE_ENV === "production") {
+    return BASE_COOKIE_OPTIONS;
+  }
+  const host = req.hostname || "";
+  let domain;
+  if (host.endsWith("mahesh.com")) {
+    domain = "mahesh.com";
+  } else if (host.endsWith("localhost")) {
+    domain = "localhost";
+  }
+  return { ...BASE_COOKIE_OPTIONS, domain };
+}
 
 // Register a new Tenant account
 export async function tenantRegister(req, res) {
@@ -59,7 +77,7 @@ export async function tenantRegister(req, res) {
     });
 
     // 1. Send the token as a cookie
-    res.cookie("token", token, COOKIE_OPTIONS);
+    res.cookie("token", token, getCookieOptions(req));
 
     const { password: _, ...tenantWithoutPassword } = tenant;
 
@@ -116,7 +134,7 @@ export async function tenantLogin(req, res) {
     });
 
     // 2. Send the token as a cookie
-    res.cookie("token", token, COOKIE_OPTIONS);
+    res.cookie("token", token, getCookieOptions(req));
 
     const { password: _, ...tenantWithoutPassword } = tenant;
 

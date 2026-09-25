@@ -2,11 +2,13 @@ import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { loginTenant, registerTenant } from "../apis/tenant.api";
 import { signInWithGoogle } from "../apis/google-auth.api";
+import { useAuth } from "../Hooks/useAuthHook";
 import { toast } from "sonner";
 
 export default function Login() {
   const location = useLocation();
   const isSignUp = location.pathname === "/signup";
+  const { checkAuth } = useAuth();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -50,10 +52,10 @@ export default function Login() {
           // Auto-login after registration
           const loginResponse = await loginTenant({ email, password });
           if (loginResponse.success) {
-            localStorage.setItem("tenantId", loginResponse.data.tenantId);
-            localStorage.setItem("tenantName", loginResponse.data.name);
-            localStorage.setItem("tenantEmail", loginResponse.data.email);
             toast.success("Successfully logged in!");
+            // Re-syncs tenant context from the now-authenticated cookie, and
+            // redirects to the tenant's vanity subdomain if one is configured.
+            await checkAuth();
             navigate("/dashboard");
           } else {
             navigate("/signin");
@@ -77,13 +79,12 @@ export default function Login() {
       setIsLoading(true);
       try {
         const response = await loginTenant({ email, password });
-        
-        if (response.success) {
-          localStorage.setItem("tenantId", response.data.tenantId);
-          localStorage.setItem("tenantName", response.data.name);
-          localStorage.setItem("tenantEmail", response.data.email);
 
+        if (response.success) {
           toast.success("Successfully logged in!");
+          // Re-syncs tenant context from the now-authenticated cookie, and
+          // redirects to the tenant's vanity subdomain if one is configured.
+          await checkAuth();
           navigate("/dashboard");
         } else {
           toast.error(response.message || "Invalid credentials. Please try again.");

@@ -17,6 +17,30 @@ export function AuthContextProvider({ children }) {
     setTenant(null);
   };
 
+  // If currently on a tenant vanity subdomain (e.g. acmecorp.mahesh.com) but there's
+  // no active session, bounce back to the bare base domain — login/signup should
+  // always happen there, not on a specific tenant's subdomain. Returns true if it
+  // triggered a redirect (caller should stop further processing).
+  const redirectToBaseDomainIfUnauthed = () => {
+    const currentHost = window.location.hostname;
+    const path = `${window.location.pathname}${window.location.search}`;
+
+    const maheshMatch = currentHost.match(/^([a-z0-9-]+)\.mahesh\.com$/);
+    if (maheshMatch) {
+      window.location.replace(`http://mahesh.com${path}`);
+      return true;
+    }
+
+    const localhostMatch = currentHost.match(/^([a-z0-9-]+)\.localhost$/);
+    if (localhostMatch) {
+      const port = window.location.port ? `:${window.location.port}` : "";
+      window.location.replace(`http://localhost${port}${path}`);
+      return true;
+    }
+
+    return false;
+  };
+
   // Re-verify the current session with backend on app boot
   const checkAuth = async () => {
     try {
@@ -28,15 +52,44 @@ export function AuthContextProvider({ children }) {
         localStorage.setItem("tenantId", tenantData.tenantId);
         localStorage.setItem("tenantName", tenantData.name);
         localStorage.setItem("tenantEmail", tenantData.email);
+
+        // Vanity workspace URL (dev only): if this tenant has a subdomain configured
+        // and we're not already on it, redirect there. The auth cookie is scoped to
+        // the matching parent domain server-side, so the session carries over.
+        // - *.mahesh.com goes through the nginx proxy on port 80 (no port in the URL)
+        // - *.localhost goes directly through Vite, keeping its current port
+        const currentHost = window.location.hostname;
+        if (tenantData.subdomain) {
+          let expectedHost = null;
+          let keepPort = false;
+          if (currentHost.endsWith("mahesh.com")) {
+            expectedHost = `${tenantData.subdomain}.mahesh.com`;
+          } else if (currentHost.endsWith("localhost")) {
+            expectedHost = `${tenantData.subdomain}.localhost`;
+            keepPort = true;
+          }
+
+          if (expectedHost && currentHost !== expectedHost) {
+            const port = keepPort && window.location.port ? `:${window.location.port}` : "";
+            window.location.replace(
+              `http://${expectedHost}${port}${window.location.pathname}${window.location.search}`
+            );
+            return;
+          }
+        }
+
         setTenant(tenantData);
       } else {
         clearSession();
+        if (redirectToBaseDomainIfUnauthed()) return;
       }
     } catch (error) {
-      console.error("Authentication session check failed:", error);
-      // Clear session only on explicit authentication failure response codes
+      // 401/403 just means no active session yet — expected for anonymous visitors
       if (error.status === 401 || error.status === 403) {
         clearSession();
+        if (redirectToBaseDomainIfUnauthed()) return;
+      } else {
+        console.error("Authentication session check failed:", error);
       }
     } finally {
       setIsLoading(false);
